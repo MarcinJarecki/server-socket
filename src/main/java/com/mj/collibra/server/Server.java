@@ -1,7 +1,11 @@
 package com.mj.collibra.server;
 
+import com.mj.collibra.chat.ChatService;
+import com.mj.collibra.model.ChatClientMessage;
+import com.mj.collibra.model.ChatServerResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -14,53 +18,48 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.UUID;
 
 
 @Component
 @Slf4j
 public class Server {
-    @Value("${server.port}")
+//    @Value("${server.port}")
     private int port;
-
-    @Value("${server.hostName}")
+//
+//    @Value("${server.hostName}")
     private String hostName;
-
-    @Value("${server.connection.timeout}")
+//
+//    @Value("${server.connection.timeout}")
     private int timeout;
+
+    private final ChatService chatService;
 
     private ServerSocket serverSocket = null;
     private Socket clientSocket = null;
     private BufferedReader in = null;
     private PrintWriter out = null;
-
-    boolean clientIsConnected = true;
-    int MAX_SERVER_TIMEOUT = 30000;
-
-    private String chatServerInitMessage = "HI, I'M ";
-    private String chatClientInitResponse = "HI, I'M ";
-    private String chatServerResponse = "HI ";
-    private String chatClientEndCommand = "BYE MATE!";
-    private String chatNotSupportedCommand = "SORRY, I DIDN'T UDERSTAND THAT";
-
     private String clientName;
-    private LocalDateTime charStartTime;
+    private LocalDateTime chatStartTime;
 
-    public Server() {
+    private boolean clientIsConnected = true;
+    private String SERVER_SAY_LOG = "Server say: {}";
+
+
+    @Autowired
+    public Server(@Qualifier("ChatService") ChatService chatService) {
+        this.chatService = chatService;
         this.start();
     }
 
     public void start() {
         this.hostName = "localhost";
         this.port = 50000;
-        this.timeout = 301000;
-
+        this.timeout = 300000;
 
         log.info("--------------------------------------------------------------------");
-        log.info("-- SERVER START on host:port: {}:{}", this.hostName, Integer.toString(this.port));
+        log.info("-- SERVER START on host:port: {}:{}", this.hostName, this.port);
         log.info("--------------------------------------------------------------------");
-        this.hostName = "localhost";
 
         try {
             serverSocket = new ServerSocket(port);
@@ -69,61 +68,41 @@ public class Server {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            // chat
             UUID uuid = UUID.randomUUID();
-            String initMessage = chatServerInitMessage.concat(uuid.toString());
-            log.debug("Server say: {}", initMessage);
+            String initMessage = chatService.startSessionResponse(uuid);
+            log.debug(SERVER_SAY_LOG, initMessage);
             out.println(initMessage);
 
+            boolean setTimeoutEnable = true;
             String message;
             while ((message = in.readLine()) != null && clientIsConnected) {
-                setTimeout(() -> {
-                    System.out.println("TIMEOUT");
-
-                    Duration chatDuration = Duration.between(charStartTime, LocalDateTime.now());
-                    long chatTime =  chatDuration.getSeconds() * 1000;
-                    String response = "BYE ".concat(clientName)
-                            .concat(", WE SPOKE FOR ")
-                            .concat(Long.toString(chatTime))
-                            .concat(" MS");
-                    log.debug("Server say: {}", response);
-                    out.println(response);
-                }, 30000);
-                charStartTime = LocalDateTime.now();
-                if (message.length() > 0) {
-                    log.debug("Client say: {}", message);
-                    if (message.indexOf(chatClientInitResponse) == 0) {
-                        clientName = message.substring(chatClientInitResponse.length());
-                        String response = chatServerResponse.concat(clientName);
-                        log.debug("Server say: {}", response);
+                chatStartTime = LocalDateTime.now();
+                if(setTimeoutEnable){
+                    setTimeoutEnable = false;
+                    setTimeout(() -> {
+                        String response = chatService.endSessionResponse(clientName, chatStartTime);
+                        log.debug("Timeout - " + SERVER_SAY_LOG, response);
                         out.println(response);
-                    } else if (message.indexOf(chatClientEndCommand) == 0) {
-                        Duration chatDuration = Duration.between(charStartTime, LocalDateTime.now());
-                        long chatTime =  chatDuration.getSeconds() * 1000;
-                        String response = "BYE ".concat(clientName)
-                                .concat(", WE SPOKE FOR ")
-                                .concat(Long.toString(chatTime))
-                                .concat(" MS");
-                        log.debug("Server say: {}", response);
-                        out.println(response);
-                    } else {
-                        log.debug("Server say: {}", chatNotSupportedCommand);
-                        out.println(chatNotSupportedCommand);
-                    }
-                } else {
-                    log.debug("Server say: {}", chatNotSupportedCommand);
-                    out.println(chatNotSupportedCommand);
+                    }, 30000);
                 }
+                log.debug("Client say: {}", message);
+                ChatClientMessage chatClientMessage = ChatClientMessage.builder()
+                        .clientName(clientName)
+                        .charStartTime(chatStartTime)
+                        .clientMessage(message)
+                        .build();
+                ChatServerResponse response = chatService.createResponseToClient(chatClientMessage);
+                if (response.getClientName() != null) {
+                    clientName = response.getClientName();
+                    log.warn("clientName: {}", clientName);
+                }
+                log.debug(SERVER_SAY_LOG, response.getServerResponse());
+                out.println(response.getServerResponse());
             }
 
         } catch (SocketTimeoutException exception) {
-            Duration chatDuration = Duration.between(charStartTime, LocalDateTime.now());
-            long chatTime =  chatDuration.getSeconds() * 1000;
-            String response = "BYE ".concat(clientName)
-                    .concat(", WE SPOKE FOR ")
-                    .concat(Long.toString(chatTime))
-                    .concat(" MS");
-            log.debug("Server say: {}", response);
+            String response =  chatService.endSessionResponse(clientName, chatStartTime);
+            log.debug(SERVER_SAY_LOG, response);
             out.println(response);
             stop();
         } catch (UnknownHostException e) {
@@ -154,7 +133,7 @@ public class Server {
                 runnable.run();
             }
             catch (Exception e){
-                System.err.println(e);
+                log.error("Sleep thread error: ", e);
             }
         }).start();
     }
