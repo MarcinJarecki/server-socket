@@ -12,6 +12,6 @@ public interface ChatService {
 
     ChatServerResponse createResponseToClient(ChatClientMessage chatClientMessage);
 
-    String endSessionResponse(String clientName, LocalDateTime chatTime);
+    String endSessionResponse(String clientName, LocalDateTime chatStartTime);
 
 }
