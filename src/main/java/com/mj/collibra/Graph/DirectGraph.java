@@ -2,7 +2,7 @@ package com.mj.collibra.Graph;
 
 import com.mj.collibra.model.GraphEdge;
 import com.mj.collibra.model.GraphNode;
-import com.mj.collibra.model.GraphServerCommand;
+import com.mj.collibra.command.GraphServerCommand;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 

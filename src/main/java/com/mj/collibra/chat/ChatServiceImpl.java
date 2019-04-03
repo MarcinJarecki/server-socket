@@ -1,5 +1,8 @@
 package com.mj.collibra.chat;
 
+import com.mj.collibra.command.ChatClientCommand;
+import com.mj.collibra.command.ChatServerCommand;
+import com.mj.collibra.command.CommonServerCommand;
 import com.mj.collibra.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

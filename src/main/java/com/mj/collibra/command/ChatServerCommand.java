@@ -1,4 +1,4 @@
-package com.mj.collibra.model;
+package com.mj.collibra.command;
 
 /**
  * @author Marcin Jarecki
