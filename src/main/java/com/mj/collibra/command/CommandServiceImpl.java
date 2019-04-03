@@ -34,6 +34,14 @@ public class CommandServiceImpl implements CommandService {
         return TypeOfCommand.UNDEFINDED;
     }
 
+    @Override
+    public GraphClientCommand getGraphCommand(String message) {
+        return Stream.of(GraphClientCommand.values())
+                .filter(command -> message.contains(command.getCommand()))
+                .findFirst().orElse(GraphClientCommand.UNDEFINED);
+
+    }
+
 
 }
 

@@ -12,4 +12,12 @@ public interface CommandService {
      * @return - type of message
      */
     TypeOfCommand getCommandType(String message);
+
+    /**
+     * Get graph command base on message
+     *
+     * @param message - message from client
+     * @return - graph command
+     */
+    GraphClientCommand getGraphCommand(String message);
 }

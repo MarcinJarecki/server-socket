@@ -1,8 +1,10 @@
 package com.mj.collibra.server;
 
+import com.mj.collibra.Graph.DirectGraphService;
 import com.mj.collibra.chat.ChatService;
 import com.mj.collibra.command.CommandServiceImpl;
 import com.mj.collibra.command.CommonServerCommand;
+import com.mj.collibra.command.GraphClientCommand;
 import com.mj.collibra.command.TypeOfCommand;
 import com.mj.collibra.model.ChatClientMessage;
 import com.mj.collibra.model.ChatServerResponse;
@@ -26,16 +28,18 @@ public class MessageHandler implements Runnable {
     private final ChatService chatService;
     private final Socket clientSocket;
     private final CommandServiceImpl commandService;
+    private final DirectGraphService directGraphService;
 
     private String clientName;
     private LocalDateTime chatStartTime;
 
     private String serverSayLog = "Server say: {}";
 
-    public MessageHandler(Socket clientSocket, ChatService chatService, CommandServiceImpl commandService) {
+    public MessageHandler(Socket clientSocket, ChatService chatService, CommandServiceImpl commandService, DirectGraphService directGraphService) {
         this.clientSocket = clientSocket;
         this.chatService = chatService;
         this.commandService = commandService;
+        this.directGraphService = directGraphService;
     }
 
     @Override
@@ -112,12 +116,36 @@ public class MessageHandler implements Runnable {
         out.println(response.getServerResponse());
     }
 
-    private void handleWihUndefinedCommand(PrintWriter out) {
-        out.println(CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommand());
+    private void handleWithGraphMessage(String message, PrintWriter out) {
+        GraphClientCommand graphClientCommand = commandService.getGraphCommand(message);
+
+        switch (graphClientCommand) {
+            case ADD_NODE:
+                directGraphService.addNode(message);
+                break;
+            case REMOVE_NOVE:
+                directGraphService.removeNode(message);
+                break;
+            case ADD_EDGE:
+                break;
+            case REMOVE_EDGE:
+                break;
+            case CLOSER_THAN:
+                break;
+            case SHORTES_PATH:
+                break;
+            case UNDEFINED:
+                handleWihUndefinedCommand(out);
+                break;
+            default:
+                handleWihUndefinedCommand(out);
+                break;
+
+        }
     }
 
-    private void handleWithGraphMessage(String message, PrintWriter out) {
-
+    private void handleWihUndefinedCommand(PrintWriter out) {
+        out.println(CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommand());
     }
 
     private void stop() {

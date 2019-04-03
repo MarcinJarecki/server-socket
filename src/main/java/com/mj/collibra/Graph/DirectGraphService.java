@@ -4,7 +4,7 @@ import com.mj.collibra.model.GraphEdge;
 import com.mj.collibra.model.GraphNode;
 import com.mj.collibra.command.GraphServerCommand;
 import lombok.Data;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 /**
  * @author Marcin Jarecki
  */
-@Component
+@Service
 @Data
-public class DirectGraph {
+public class DirectGraphService {
     private ConcurrentHashMap<GraphNode, CopyOnWriteArrayList<GraphNode>> adjacencyNodes;
     private ConcurrentHashMap<Integer, GraphEdge> edges;
 
