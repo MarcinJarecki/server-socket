@@ -13,6 +13,9 @@ import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * @author Marcin Jarecki
+ */
 @Slf4j
 public class MessageHandler implements Runnable{
 

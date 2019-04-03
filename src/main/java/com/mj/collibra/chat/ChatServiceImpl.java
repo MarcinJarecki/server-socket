@@ -1,7 +1,6 @@
 package com.mj.collibra.chat;
 
-import com.mj.collibra.model.ChatClientMessage;
-import com.mj.collibra.model.ChatServerResponse;
+import com.mj.collibra.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -9,18 +8,16 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * @author Marcin Jarecki
+ */
 @Service("ChatService")
 @Slf4j
 public class ChatServiceImpl implements ChatService {
 
-    private static final String CHAT_SERVER_RESPONSE = "HI ";
-    private static final String CHAT_CLIENT_INIT_RESPONSE = "HI, I'M ";
-    private static final String CHAT_CLIENT_END_COMMAND = "BYE MATE!";
-    private static final String NOT_SUPPORTED_COMMAND_RESPONSE = "SORRY, I DIDN'T UNDERSTAND THAT";
-
     @Override
     public String startSessionResponse(UUID uuid) {
-        return CHAT_CLIENT_INIT_RESPONSE + uuid.toString();
+        return ChatClientCommand.START.getCommand() + uuid.toString();
     }
 
     @Override
@@ -28,13 +25,13 @@ public class ChatServiceImpl implements ChatService {
         String clientName;
         String message = chatClientMessage.getClientMessage();
         if (message.length() > 0) {
-            if (message.indexOf(CHAT_CLIENT_INIT_RESPONSE) == 0) {
-                clientName = message.substring(CHAT_CLIENT_INIT_RESPONSE.length());
+            if (message.indexOf(ChatClientCommand.START.getCommand()) == 0) {
+                clientName = message.substring(ChatClientCommand.START.getCommand().length());
                 return  ChatServerResponse.builder()
                         .clientName(clientName)
-                        .serverResponse(CHAT_SERVER_RESPONSE + clientName)
+                        .serverResponse(ChatServerCommand.START.getCommand() + clientName)
                         .build();
-            } else if (message.indexOf(CHAT_CLIENT_END_COMMAND) == 0) {
+            } else if (message.indexOf(ChatClientCommand.END.getCommand()) == 0) {
                 clientName = chatClientMessage.getClientName() != null ? chatClientMessage.getClientName() : "";
                 return ChatServerResponse.builder()
                         .clientName(clientName)
@@ -52,18 +49,18 @@ public class ChatServiceImpl implements ChatService {
         if (clientName == null) {clientName = "";}
         long chatDuration =  Duration.between(chatStartTime, LocalDateTime.now()).getSeconds() * 1000;
         return new StringBuffer ()
-                .append("BYE ")
+                .append(ChatServerCommand.END_PART_1.getCommand())
                 .append(clientName)
-                .append(", WE SPOKE FOR ")
+                .append(ChatServerCommand.END_PART_2.getCommand())
                 .append(chatDuration)
-                .append(" MS")
+                .append(ChatServerCommand.END_PART_3.getCommand())
                 .toString();
     }
 
     private ChatServerResponse notSupportedCommand() {
         return ChatServerResponse.builder()
                 .clientName(null)
-                .serverResponse(NOT_SUPPORTED_COMMAND_RESPONSE)
+                .serverResponse(CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommand())
                 .build();
     }
 

@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * @author Marcin Jarecki
+ */
 @Data
 @Builder
 public class ChatClientMessage {

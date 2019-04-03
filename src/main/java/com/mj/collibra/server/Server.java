@@ -19,6 +19,9 @@ import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * @author Marcin Jarecki
+ */
 @Component
 @Slf4j
 public class Server {
