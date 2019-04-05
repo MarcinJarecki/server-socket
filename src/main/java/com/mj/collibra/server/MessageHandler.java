@@ -2,7 +2,7 @@ package com.mj.collibra.server;
 
 import com.mj.collibra.Graph.DirectGraphService;
 import com.mj.collibra.chat.ChatService;
-import com.mj.collibra.command.CommandServiceImpl;
+import com.mj.collibra.command.CommandParserServiceImpl;
 import com.mj.collibra.command.CommonServerCommand;
 import com.mj.collibra.command.GraphClientCommand;
 import com.mj.collibra.command.TypeOfCommand;
@@ -27,7 +27,7 @@ public class MessageHandler implements Runnable {
 
     private final ChatService chatService;
     private final Socket clientSocket;
-    private final CommandServiceImpl commandService;
+    private final CommandParserServiceImpl commandParserService;
     private final DirectGraphService directGraphService;
 
     private String clientName;
@@ -35,10 +35,10 @@ public class MessageHandler implements Runnable {
 
     private String serverSayLog = "Server say: {}";
 
-    public MessageHandler(Socket clientSocket, ChatService chatService, CommandServiceImpl commandService, DirectGraphService directGraphService) {
+    public MessageHandler(Socket clientSocket, ChatService chatService, CommandParserServiceImpl commandParserService, DirectGraphService directGraphService) {
         this.clientSocket = clientSocket;
         this.chatService = chatService;
-        this.commandService = commandService;
+        this.commandParserService = commandParserService;
         this.directGraphService = directGraphService;
     }
 
@@ -68,23 +68,23 @@ public class MessageHandler implements Runnable {
                 log.debug("Client say: {}", message);
 
                 if (message.length() > 0) {
-                    TypeOfCommand typeOfCommand = commandService.getCommandType(message);
+                    TypeOfCommand typeOfCommand = commandParserService.getCommandType(message);
                     switch (typeOfCommand) {
                         case CHAT:
-                            handleWithChatMessage(message, out);
+                            out.println(handleWithChatMessage(message));
                             break;
                         case GRAPH:
-                            handleWithGraphMessage(message, out);
+                            out.println(handleWithGraphMessage(message));
                             break;
                         case UNDEFINDED:
-                            handleWihUndefinedCommand(out);
+                            out.println(getUndefinedCommandResponse());
                             break;
                         default:
-                            handleWihUndefinedCommand(out);
+                            out.println(getUndefinedCommandResponse());
                             break;
                     }
                 } else {
-                    handleWihUndefinedCommand(out);
+                    out.println(getUndefinedCommandResponse());
                 }
             }
 
@@ -101,7 +101,7 @@ public class MessageHandler implements Runnable {
 
     }
 
-    private void handleWithChatMessage(String message, PrintWriter out) {
+    private String handleWithChatMessage(String message) {
         ChatClientMessage chatClientMessage = ChatClientMessage.builder()
                 .clientName(clientName)
                 .charStartTime(chatStartTime)
@@ -110,42 +110,45 @@ public class MessageHandler implements Runnable {
         ChatServerResponse response = chatService.createResponseToClient(chatClientMessage);
         if (response.getClientName() != null) {
             clientName = response.getClientName();
-            log.warn("clientName: {}", clientName);
+            log.debug("clientName: {}", clientName);
         }
         log.debug(serverSayLog, response.getServerResponse());
-        out.println(response.getServerResponse());
+
+        return response.getServerResponse();
     }
 
-    private void handleWithGraphMessage(String message, PrintWriter out) {
-        GraphClientCommand graphClientCommand = commandService.getGraphCommand(message);
+    private String handleWithGraphMessage(String message) {
+        GraphClientCommand graphClientCommand = commandParserService.getGraphCommand(message);
+        String response = getUndefinedCommandResponse();
 
         switch (graphClientCommand) {
             case ADD_NODE:
-                directGraphService.addNode(message);
+                response = directGraphService.addNode(message);
                 break;
-            case REMOVE_NOVE:
-                directGraphService.removeNode(message);
+            case REMOVE_NODE:
+                response = directGraphService.removeNode(message);
                 break;
             case ADD_EDGE:
+                response = directGraphService.addEdge(message, "");
                 break;
             case REMOVE_EDGE:
+                response = directGraphService.removeEdge(message, "");
                 break;
             case CLOSER_THAN:
                 break;
             case SHORTES_PATH:
                 break;
             case UNDEFINED:
-                handleWihUndefinedCommand(out);
                 break;
             default:
-                handleWihUndefinedCommand(out);
                 break;
-
         }
+        log.debug(serverSayLog, response);
+        return response;
     }
 
-    private void handleWihUndefinedCommand(PrintWriter out) {
-        out.println(CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommand());
+    private String getUndefinedCommandResponse(){
+        return CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommand();
     }
 
     private void stop() {
@@ -158,6 +161,7 @@ public class MessageHandler implements Runnable {
         }
     }
 
+    // TODO to sheduleExecutor
     private static void setTimeout(Runnable runnable, int delay) {
         new Thread(() -> {
             try {

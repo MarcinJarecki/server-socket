@@ -2,7 +2,7 @@ package com.mj.collibra.server;
 
 import com.mj.collibra.Graph.DirectGraphService;
 import com.mj.collibra.chat.ChatService;
-import com.mj.collibra.command.CommandServiceImpl;
+import com.mj.collibra.command.CommandParserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,14 +25,14 @@ import java.util.concurrent.Executors;
 public class SocketServer implements ApplicationListener<ApplicationReadyEvent> {
 
     private ChatService chatService;
-    private CommandServiceImpl commandService;
+    private CommandParserServiceImpl commandService;
 
     private ExecutorService executor = null;
     private DirectGraphService directGraphService;
 
     @Autowired
     public SocketServer(@Qualifier("ChatService") ChatService chatService,
-                        CommandServiceImpl commandService,
+                        CommandParserServiceImpl commandService,
                         DirectGraphService directGraphService) {
         this.chatService = chatService;
         this.commandService = commandService;
@@ -49,6 +49,7 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             log.info("-- SERVER START on host:port: {}:{}", hostName, port);
             log.info("--------------------------------------------------------------------");
 
+            // TODO to pool
             executor = Executors.newFixedThreadPool(5);
 
             directGraphService = new DirectGraphService();

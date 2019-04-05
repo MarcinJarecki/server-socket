@@ -3,7 +3,7 @@ package com.mj.collibra.command;
 /**
  * @author Marcin Jarecki
  */
-public interface CommandService {
+public interface CommandParserService {
 
     /**
      * Return command type base on message content
