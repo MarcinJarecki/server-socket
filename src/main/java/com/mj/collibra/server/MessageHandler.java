@@ -166,8 +166,11 @@ public class MessageHandler implements Runnable {
         return response;
     }
 
+
     private String getUndefinedCommandResponse() {
-        return CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommandName();
+        String response = CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommandName();
+        log.debug(serverSayLog, response);
+        return response;
     }
 
     private void stop() {
