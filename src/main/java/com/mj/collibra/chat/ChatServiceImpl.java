@@ -1,8 +1,8 @@
 package com.mj.collibra.chat;
 
-import com.mj.collibra.command.ChatClientCommand;
-import com.mj.collibra.command.ChatServerCommand;
-import com.mj.collibra.command.CommonServerCommand;
+import com.mj.collibra.command.enums.ChatClientCommand;
+import com.mj.collibra.command.enums.ChatServerCommand;
+import com.mj.collibra.command.enums.CommonServerCommand;
 import com.mj.collibra.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public String startSessionResponse(UUID uuid) {
-        return ChatClientCommand.START.getCommand() + uuid.toString();
+        return ChatClientCommand.START.getCommandName() + uuid.toString();
     }
 
     @Override
@@ -28,13 +28,13 @@ public class ChatServiceImpl implements ChatService {
         String clientName;
         String message = chatClientMessage.getClientMessage();
         if (message.length() > 0) {
-            if (message.indexOf(ChatClientCommand.START.getCommand()) == 0) {
-                clientName = message.substring(ChatClientCommand.START.getCommand().length());
+            if (message.indexOf(ChatClientCommand.START.getCommandName()) == 0) {
+                clientName = message.substring(ChatClientCommand.START.getCommandName().length());
                 return  ChatServerResponse.builder()
                         .clientName(clientName)
-                        .serverResponse(ChatServerCommand.START.getCommand() + clientName)
+                        .serverResponse(ChatServerCommand.START.getCommandName() + clientName)
                         .build();
-            } else if (message.indexOf(ChatClientCommand.END.getCommand()) == 0) {
+            } else if (message.indexOf(ChatClientCommand.END.getCommandName()) == 0) {
                 clientName = chatClientMessage.getClientName() != null ? chatClientMessage.getClientName() : "";
                 return ChatServerResponse.builder()
                         .clientName(clientName)
@@ -52,18 +52,18 @@ public class ChatServiceImpl implements ChatService {
         if (clientName == null) {clientName = "";}
         long chatDuration =  Duration.between(chatStartTime, LocalDateTime.now()).getSeconds() * 1000;
         return new StringBuffer ()
-                .append(ChatServerCommand.END_PART_1.getCommand())
+                .append(ChatServerCommand.END_PART_1.getCommandName())
                 .append(clientName)
-                .append(ChatServerCommand.END_PART_2.getCommand())
+                .append(ChatServerCommand.END_PART_2.getCommandName())
                 .append(chatDuration)
-                .append(ChatServerCommand.END_PART_3.getCommand())
+                .append(ChatServerCommand.END_PART_3.getCommandName())
                 .toString();
     }
 
     private ChatServerResponse notSupportedCommand() {
         return ChatServerResponse.builder()
                 .clientName(null)
-                .serverResponse(CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommand())
+                .serverResponse(CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommandName())
                 .build();
     }
 

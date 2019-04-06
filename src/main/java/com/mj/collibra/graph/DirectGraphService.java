@@ -1,13 +1,11 @@
-package com.mj.collibra.Graph;
+package com.mj.collibra.graph;
 
 import com.mj.collibra.model.GraphEdge;
 import com.mj.collibra.model.GraphNode;
-import com.mj.collibra.command.GraphServerCommand;
+import com.mj.collibra.command.enums.GraphServerCommand;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -33,9 +31,9 @@ public class DirectGraphService {
             if (name != null && !isNodeExist(name)) {
                 GraphNode node = new GraphNode(name);
                 adjacencyNodes.putIfAbsent(node, new CopyOnWriteArrayList<>());
-                return GraphServerCommand.NODE_ADDED.getCommand();
+                return GraphServerCommand.NODE_ADDED.getCommandName();
             } else {
-                return GraphServerCommand.NODE_ALREADY_EXISTS.getCommand();
+                return GraphServerCommand.NODE_ALREADY_EXISTS.getCommandName();
             }
         } finally {
             writeLock.unlock();
@@ -52,22 +50,22 @@ public class DirectGraphService {
                         .map(value -> value.remove(node))
                         .collect(Collectors.toList());
                 adjacencyNodes.remove(node);
-                return GraphServerCommand.NODE_REMOVED.getCommand();
+                return GraphServerCommand.NODE_REMOVED.getCommandName();
             } else {
-                return GraphServerCommand.NODE_NOT_FOUND.getCommand();
+                return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
         } finally {
             readLock.unlock();
         }
     }
 
-    public String addEdge(String x, String y) {
+    public String addEdge(String x, String y, String weight) {
         writeLock.lock();
         try {
             if (x != null && y != null) {
-                return GraphServerCommand.EDGE_ADDED.getCommand();
+                return GraphServerCommand.EDGE_ADDED.getCommandName();
             } else {
-                return GraphServerCommand.NODE_NOT_FOUND.getCommand();
+                return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
         } finally {
             writeLock.unlock();
@@ -79,9 +77,9 @@ public class DirectGraphService {
         readLock.lock();
         try {
             if (x != null && y != null) {
-                return GraphServerCommand.EDGE_REMOVED.getCommand();
+                return GraphServerCommand.EDGE_REMOVED.getCommandName();
             } else {
-                return GraphServerCommand.NODE_NOT_FOUND.getCommand();
+                return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
         } finally {
             readLock.unlock();

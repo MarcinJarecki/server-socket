@@ -1,22 +1,28 @@
-package com.mj.collibra.command;
+package com.mj.collibra.command.enums;
 
 /**
  * @author Marcin Jarecki
  */
-public enum CommonServerCommand {
+public enum CommonServerCommand implements Command {
     /**
      * First chars at server response message
      */
     NOT_SUPPORTED_COMMAND("SORRY, I DIDN'T UNDERSTAND THAT");
 
     private String command;
+    private int length;
 
     CommonServerCommand(String command){
         this.command = command;
+        this.length = command.length();
     }
 
-    public String getCommand() {
+    @Override
+    public String getCommandName() {
         return this.command;
     }
+
+    @Override
+    public int getLength() { return this.length;}
 
 }

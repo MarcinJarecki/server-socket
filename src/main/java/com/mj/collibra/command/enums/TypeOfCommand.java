@@ -1,4 +1,4 @@
-package com.mj.collibra.command;
+package com.mj.collibra.command.enums;
 
 /**
  * @author Marcin Jarecki

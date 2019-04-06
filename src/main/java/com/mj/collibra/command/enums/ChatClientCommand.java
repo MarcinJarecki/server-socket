@@ -1,9 +1,9 @@
-package com.mj.collibra.command;
+package com.mj.collibra.command.enums;
 
 /**
  * @author Marcin Jarecki
  */
-public enum ChatClientCommand {
+public enum ChatClientCommand implements Command {
     /**
      * First chars at client message related with chat
      */
@@ -11,13 +11,19 @@ public enum ChatClientCommand {
     END("BYE MATE!");
 
     private String command;
+    private int length;
 
     ChatClientCommand(String command){
         this.command = command;
+        this.length = command.length();
     }
 
-    public String getCommand() {
+    @Override
+    public String getCommandName() {
         return this.command;
     }
+
+    @Override
+    public int getLength() { return this.length;}
 
 }

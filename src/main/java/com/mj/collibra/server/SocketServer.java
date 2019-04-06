@@ -1,8 +1,8 @@
 package com.mj.collibra.server;
 
-import com.mj.collibra.Graph.DirectGraphService;
+import com.mj.collibra.graph.DirectGraphService;
 import com.mj.collibra.chat.ChatService;
-import com.mj.collibra.command.CommandParserServiceImpl;
+import com.mj.collibra.command.parser.CommandParserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Marcin Jarecki
@@ -55,7 +56,7 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             directGraphService = new DirectGraphService();
 
             //noinspection InfiniteLoopStatement
-            while(true){
+            while (true) {
                 Socket clientSocket = serverSocket.accept();
                 Runnable worker = new MessageHandler(clientSocket, chatService, commandService, directGraphService);
                 executor.execute(worker);
@@ -64,7 +65,15 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             log.error("Problem with start server socket", e);
         } finally {
             if (executor != null) {
-                executor.shutdown();
+                try {
+                    executor.shutdown();
+                    executor.awaitTermination(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    log.error("Server socket interrupted", e);
+                    Thread.currentThread().interrupt();
+                } finally {
+                    executor.shutdownNow();
+                }
             }
         }
 

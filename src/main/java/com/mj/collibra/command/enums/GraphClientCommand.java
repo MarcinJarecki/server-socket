@@ -1,9 +1,9 @@
-package com.mj.collibra.command;
+package com.mj.collibra.command.enums;
 
 /**
  * @author Marcin Jarecki
  */
-public enum GraphClientCommand {
+public enum GraphClientCommand implements Command {
     /**
      * First chars at client message related with building graph
      */
@@ -16,12 +16,18 @@ public enum GraphClientCommand {
     UNDEFINED("");
 
     private String command;
+    private int length;
 
     GraphClientCommand(String command){
         this.command = command;
+        this.length = command.length();
     }
 
-    public String getCommand(){
+    @Override
+    public String getCommandName(){
         return this.command;
     }
+
+    @Override
+    public int getLength() { return this.length;}
 }

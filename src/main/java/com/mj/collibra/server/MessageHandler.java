@@ -1,13 +1,13 @@
 package com.mj.collibra.server;
 
-import com.mj.collibra.Graph.DirectGraphService;
+import com.mj.collibra.graph.DirectGraphService;
 import com.mj.collibra.chat.ChatService;
-import com.mj.collibra.command.CommandParserServiceImpl;
-import com.mj.collibra.command.CommonServerCommand;
-import com.mj.collibra.command.GraphClientCommand;
-import com.mj.collibra.command.TypeOfCommand;
+import com.mj.collibra.command.parser.CommandParserServiceImpl;
+import com.mj.collibra.command.enums.CommonServerCommand;
+import com.mj.collibra.command.enums.GraphClientCommand;
 import com.mj.collibra.model.ChatClientMessage;
 import com.mj.collibra.model.ChatServerResponse;
+import com.mj.collibra.model.CommandData;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -18,6 +18,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 /**
  * @author Marcin Jarecki
@@ -32,6 +33,8 @@ public class MessageHandler implements Runnable {
 
     private String clientName;
     private LocalDateTime chatStartTime;
+    private ScheduledExecutorService executorTimeut = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> scheduledFuture = null;
 
     private String serverSayLog = "Server say: {}";
 
@@ -53,28 +56,32 @@ public class MessageHandler implements Runnable {
             log.debug(serverSayLog, initMessage);
             out.println(initMessage);
 
-            boolean setTimeoutEnable = true;
+
             String message;
             while ((message = in.readLine()) != null) {
                 chatStartTime = LocalDateTime.now();
-                if (setTimeoutEnable) {
-                    setTimeoutEnable = false;
-                    setTimeout(() -> {
-                        String response = chatService.endSessionResponse(clientName, chatStartTime);
-                        log.debug("Timeout - " + serverSayLog, response);
-                        out.println(response);
-                    }, 30000 + 100);
+
+                if (scheduledFuture != null) {
+                    scheduledFuture.cancel(true);
                 }
+
+                Runnable timeoutTask = () -> {
+                    String response = chatService.endSessionResponse(clientName, chatStartTime);
+                    log.debug("Timeout - " + serverSayLog, response);
+                    out.println(response);
+                };
+                scheduledFuture = executorTimeut.schedule(timeoutTask, 30, TimeUnit.SECONDS);
+
                 log.debug("Client say: {}", message);
 
                 if (message.length() > 0) {
-                    TypeOfCommand typeOfCommand = commandParserService.getCommandType(message);
-                    switch (typeOfCommand) {
+                    CommandData commandData = commandParserService.createCommand(message);
+                    switch (commandData.getTypeOfCommand()) {
                         case CHAT:
                             out.println(handleWithChatMessage(message));
                             break;
                         case GRAPH:
-                            out.println(handleWithGraphMessage(message));
+                            out.println(handleWithGraphCommand(commandData));
                             break;
                         case UNDEFINDED:
                             out.println(getUndefinedCommandResponse());
@@ -96,7 +103,7 @@ public class MessageHandler implements Runnable {
             log.error("IO Exception in MessageHandler:", e);
         } catch (Exception e) {
             stop();
-            log.error("Exceprion in Thread Run in MessageHandler. Exception:", e);
+            log.error("Exception in Thread Run in MessageHandler. Exception:", e);
         }
 
     }
@@ -117,22 +124,34 @@ public class MessageHandler implements Runnable {
         return response.getServerResponse();
     }
 
-    private String handleWithGraphMessage(String message) {
-        GraphClientCommand graphClientCommand = commandParserService.getGraphCommand(message);
+    private String handleWithGraphCommand(CommandData commandData) {
+        GraphClientCommand graphClientCommand = (GraphClientCommand) commandData.getCommand();
         String response = getUndefinedCommandResponse();
+        String[] arguments = commandData.getArguments();
+        String nodeName;
+        String nodeX;
+        String nodeY;
+        String edgeWeight;
 
         switch (graphClientCommand) {
             case ADD_NODE:
-                response = directGraphService.addNode(message);
+                nodeName = arguments[0];
+                response = directGraphService.addNode(nodeName);
                 break;
             case REMOVE_NODE:
-                response = directGraphService.removeNode(message);
+                nodeName = arguments[0];
+                response = directGraphService.removeNode(nodeName);
                 break;
             case ADD_EDGE:
-                response = directGraphService.addEdge(message, "");
+                nodeX = arguments[0];
+                nodeY = arguments[1];
+                edgeWeight = arguments[2];
+                response = directGraphService.addEdge(nodeX, nodeY, edgeWeight);
                 break;
             case REMOVE_EDGE:
-                response = directGraphService.removeEdge(message, "");
+                nodeX = arguments[0];
+                nodeY = arguments[1];
+                response = directGraphService.removeEdge(nodeX, nodeY);
                 break;
             case CLOSER_THAN:
                 break;
@@ -147,11 +166,22 @@ public class MessageHandler implements Runnable {
         return response;
     }
 
-    private String getUndefinedCommandResponse(){
-        return CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommand();
+    private String getUndefinedCommandResponse() {
+        return CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommandName();
     }
 
     private void stop() {
+
+        try {
+            executorTimeut.shutdown();
+            executorTimeut.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.error("Timeout thread is interrupted", e);
+            Thread.currentThread().interrupt();
+        } finally {
+            executorTimeut.shutdownNow();
+        }
+
         try {
             if (clientSocket != null) {
                 clientSocket.close();
@@ -161,15 +191,15 @@ public class MessageHandler implements Runnable {
         }
     }
 
-    // TODO to sheduleExecutor
-    private static void setTimeout(Runnable runnable, int delay) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(delay);
-                runnable.run();
-            } catch (Exception e) {
-                log.error("Sleep thread error: ", e);
-            }
-        }).start();
-    }
+
+//    private static void setTimeout(Runnable runnable, int delay) {
+//        new Thread(() -> {
+//            try {
+//                Thread.sleep(delay);
+//                runnable.run();
+//            } catch (Exception e) {
+//                log.error("Sleep thread error: ", e);
+//            }
+//        }).start();
+//    }
 }
