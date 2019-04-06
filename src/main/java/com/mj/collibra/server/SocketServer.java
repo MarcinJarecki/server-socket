@@ -51,7 +51,7 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             log.info("--------------------------------------------------------------------");
 
             // TODO to pool
-            executor = Executors.newFixedThreadPool(5);
+            executor = Executors.newFixedThreadPool(10);
 
             directGraphService = new DirectGraphService();
 

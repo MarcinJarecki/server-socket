@@ -12,8 +12,7 @@ public enum GraphClientCommand implements Command {
     REMOVE_NODE("REMOVE NODE"),
     REMOVE_EDGE("REMOVE EDGE"),
     SHORTES_PATH("SHORTEST_PATH"),
-    CLOSER_THAN("CLOSER THAN"),
-    UNDEFINED("");
+    CLOSER_THAN("CLOSER THAN");
 
     private String command;
     private int length;

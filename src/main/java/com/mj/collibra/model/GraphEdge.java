@@ -9,7 +9,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class GraphEdge {
-    private GraphNode nodeX;
-    private GraphNode nodeY;
+    private GraphNode node;
     private int weight;
 }

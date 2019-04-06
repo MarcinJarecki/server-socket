@@ -6,6 +6,7 @@ import com.mj.collibra.command.enums.GraphServerCommand;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -28,10 +29,14 @@ public class DirectGraphService {
     public String addNode(String name) {
         writeLock.lock();
         try {
-            if (name != null && !isNodeExist(name)) {
+            if (name != null) {
                 GraphNode node = new GraphNode(name);
-                adjacencyNodes.putIfAbsent(node, new CopyOnWriteArrayList<>());
-                return GraphServerCommand.NODE_ADDED.getCommandName();
+                if (!isNodeExist(node)) {
+                    adjacencyNodes.putIfAbsent(node, new CopyOnWriteArrayList<>());
+                    return GraphServerCommand.NODE_ADDED.getCommandName();
+                } else {
+                    return GraphServerCommand.NODE_ALREADY_EXISTS.getCommandName();
+                }
             } else {
                 return GraphServerCommand.NODE_ALREADY_EXISTS.getCommandName();
             }
@@ -43,14 +48,18 @@ public class DirectGraphService {
     public String removeNode(String name) {
         readLock.lock();
         try {
-            if (name != null && isNodeExist(name)) {
+            if (name != null) {
                 GraphNode node = new GraphNode(name);
-                adjacencyNodes.values()
-                        .stream()
-                        .map(value -> value.remove(node))
-                        .collect(Collectors.toList());
-                adjacencyNodes.remove(node);
-                return GraphServerCommand.NODE_REMOVED.getCommandName();
+                if (isNodeExist(node)) {
+                    adjacencyNodes.values()
+                            .stream()
+                            .map(value -> value.remove(node))
+                            .collect(Collectors.toList());
+                    adjacencyNodes.remove(node);
+                    return GraphServerCommand.NODE_REMOVED.getCommandName();
+                } else {
+                    return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+                }
             } else {
                 return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
@@ -59,11 +68,22 @@ public class DirectGraphService {
         }
     }
 
-    public String addEdge(String x, String y, String weight) {
+    public String addEdge(String nodeXName, String nodeYName, String weightEdge) {
         writeLock.lock();
         try {
-            if (x != null && y != null) {
-                return GraphServerCommand.EDGE_ADDED.getCommandName();
+            int weight = Integer.parseInt(weightEdge);
+
+            if (nodeXName != null && nodeYName != null) {
+                GraphNode nodeX = new GraphNode(nodeXName);
+                GraphNode nodeY = new GraphNode(nodeYName);
+                if (isNodeExist(nodeX) && isNodeExist(nodeY)) {
+                    GraphEdge edge = new GraphEdge(nodeY, weight);
+                    adjacencyNodes.get(nodeX).add(nodeY);
+                    adjacencyNodes.get(nodeY).add(nodeX);
+                    return GraphServerCommand.EDGE_ADDED.getCommandName();
+                } else {
+                    return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+                }
             } else {
                 return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
@@ -73,11 +93,25 @@ public class DirectGraphService {
 
     }
 
-    public String removeEdge(String x, String y) {
+    public String removeEdge(String nodeXName, String nodeYName) {
         readLock.lock();
         try {
-            if (x != null && y != null) {
-                return GraphServerCommand.EDGE_REMOVED.getCommandName();
+            if (nodeXName != null && nodeYName != null) {
+                GraphNode nodeX = new GraphNode(nodeXName);
+                GraphNode nodeY = new GraphNode(nodeYName);
+                if (isNodeExist(nodeX) && isNodeExist(nodeY)) {
+                    List<GraphNode> edgesNodeX = adjacencyNodes.get(nodeX);
+                    List<GraphNode> edgesNodeY = adjacencyNodes.get(nodeY);
+                    if (edgesNodeX != null) {
+                        edgesNodeX.remove(nodeY);
+                    }
+                    if (edgesNodeY != null) {
+                        edgesNodeY.remove(nodeX);
+                    }
+                    return GraphServerCommand.EDGE_REMOVED.getCommandName();
+                } else {
+                    return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+                }
             } else {
                 return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
@@ -86,8 +120,7 @@ public class DirectGraphService {
         }
     }
 
-    private boolean isNodeExist(String name) {
-        GraphNode node = new GraphNode(name);
+    private boolean isNodeExist(GraphNode node) {
         if (adjacencyNodes.size() > 0) {
             return adjacencyNodes.containsKey(node);
         } else {

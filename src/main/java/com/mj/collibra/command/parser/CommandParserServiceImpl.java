@@ -27,10 +27,10 @@ public class CommandParserServiceImpl implements CommandParserService {
                     .orElse(null);
 
             if (chatClientCommand != null) {
-                return  CommandData.builder()
+                return CommandData.builder()
                         .typeOfCommand(TypeOfCommand.CHAT)
                         .command(chatClientCommand)
-                        .arguments(getCommandParameters(chatClientCommand, message))
+                        .arguments(new String[0])
                         .build();
             }
             // TODO Regex
@@ -40,7 +40,7 @@ public class CommandParserServiceImpl implements CommandParserService {
                     .orElse(null);
 
             if (graphClientCommand != null) {
-                return  CommandData.builder()
+                return CommandData.builder()
                         .typeOfCommand(TypeOfCommand.GRAPH)
                         .command(graphClientCommand)
                         .arguments(getCommandParameters(graphClientCommand, message))
@@ -48,7 +48,7 @@ public class CommandParserServiceImpl implements CommandParserService {
             }
         }
 
-        return  CommandData.builder()
+        return CommandData.builder()
                 .typeOfCommand(TypeOfCommand.UNDEFINDED)
                 .command(null)
                 .arguments(null)
@@ -60,38 +60,6 @@ public class CommandParserServiceImpl implements CommandParserService {
         String parameters = message.substring(command.getLength() + countOfSpaceAfterCommand);
         return parameters.split(" ");
     }
-
-    @Override
-    public TypeOfCommand getCommandType(String message) {
-        if (message != null && message.length() > 0) {
-            ChatClientCommand isChatMessage = Stream.of(ChatClientCommand.values())
-                    .filter(command -> message.contains(command.getCommandName()))
-                    .findFirst()
-                    .orElse(null);
-
-            if (isChatMessage != null) {
-                return TypeOfCommand.CHAT;
-            }
-
-            GraphClientCommand isGraphMessage = Stream.of(GraphClientCommand.values())
-                    .filter(command -> message.contains(command.getCommandName()))
-                    .findFirst()
-                    .orElse(null);
-
-            if (isGraphMessage != null) {
-                return TypeOfCommand.GRAPH;
-            }
-        }
-        return TypeOfCommand.UNDEFINDED;
-    }
-
-    @Override
-    public GraphClientCommand getGraphCommand(String message) {
-        return Stream.of(GraphClientCommand.values())
-                .filter(command -> message.contains(command.getCommandName()))
-                .findFirst().orElse(GraphClientCommand.UNDEFINED);
-    }
-
 
 }
 

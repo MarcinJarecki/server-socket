@@ -33,12 +33,12 @@ public class MessageHandler implements Runnable {
 
     private String clientName;
     private LocalDateTime chatStartTime;
-    private ScheduledExecutorService executorTimeut = Executors.newScheduledThreadPool(1);
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> scheduledFuture = null;
 
     private String serverSayLog = "Server say: {}";
 
-    public MessageHandler(Socket clientSocket, ChatService chatService, CommandParserServiceImpl commandParserService, DirectGraphService directGraphService) {
+    MessageHandler(Socket clientSocket, ChatService chatService, CommandParserServiceImpl commandParserService, DirectGraphService directGraphService) {
         this.clientSocket = clientSocket;
         this.chatService = chatService;
         this.commandParserService = commandParserService;
@@ -70,7 +70,7 @@ public class MessageHandler implements Runnable {
                     log.debug("Timeout - " + serverSayLog, response);
                     out.println(response);
                 };
-                scheduledFuture = executorTimeut.schedule(timeoutTask, 30, TimeUnit.SECONDS);
+                scheduledFuture = scheduledExecutorService.schedule(timeoutTask, 30, TimeUnit.SECONDS);
 
                 log.debug("Client say: {}", message);
 
@@ -125,13 +125,14 @@ public class MessageHandler implements Runnable {
     }
 
     private String handleWithGraphCommand(CommandData commandData) {
-        GraphClientCommand graphClientCommand = (GraphClientCommand) commandData.getCommand();
         String response = getUndefinedCommandResponse();
-        String[] arguments = commandData.getArguments();
         String nodeName;
         String nodeX;
         String nodeY;
         String edgeWeight;
+
+        GraphClientCommand graphClientCommand = (GraphClientCommand) commandData.getCommand();
+        String[] arguments = commandData.getArguments();
 
         switch (graphClientCommand) {
             case ADD_NODE:
@@ -157,9 +158,8 @@ public class MessageHandler implements Runnable {
                 break;
             case SHORTES_PATH:
                 break;
-            case UNDEFINED:
-                break;
             default:
+                response = getUndefinedCommandResponse();
                 break;
         }
         log.debug(serverSayLog, response);
@@ -173,13 +173,13 @@ public class MessageHandler implements Runnable {
     private void stop() {
 
         try {
-            executorTimeut.shutdown();
-            executorTimeut.awaitTermination(5, TimeUnit.SECONDS);
+            scheduledExecutorService.shutdown();
+            scheduledExecutorService.awaitTermination(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             log.error("Timeout thread is interrupted", e);
             Thread.currentThread().interrupt();
         } finally {
-            executorTimeut.shutdownNow();
+            scheduledExecutorService.shutdownNow();
         }
 
         try {
@@ -191,15 +191,4 @@ public class MessageHandler implements Runnable {
         }
     }
 
-
-//    private static void setTimeout(Runnable runnable, int delay) {
-//        new Thread(() -> {
-//            try {
-//                Thread.sleep(delay);
-//                runnable.run();
-//            } catch (Exception e) {
-//                log.error("Sleep thread error: ", e);
-//            }
-//        }).start();
-//    }
 }
