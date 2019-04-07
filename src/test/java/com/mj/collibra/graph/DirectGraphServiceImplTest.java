@@ -152,7 +152,6 @@ public class DirectGraphServiceImplTest {
         assertEquals(expectedResponse, response);
     }
 
-    // TODO
     @Test
     public void shouldFindShortestPathCase1() {
         String sourceNode = nodeNames[1];
@@ -241,5 +240,37 @@ public class DirectGraphServiceImplTest {
         assertEquals(expectedResponse, response);
     }
 
-    ///
+    /// TODO
+    @Test
+    public void shouldReturnCloserThanCase1() {
+        String sourceNode = nodeNames[0];
+        String weight = "5";
+        String expectedResponse = nodeNames[1] + "," +nodeNames[2];
+
+        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+
+        assertEquals(expectedResponse.toString(), response);
+    }
+
+    @Test
+    public void shouldNotReturnCloserThanWhenSourceNodeNotExist() {
+        String sourceNode = "999";
+        String weight = "10";
+        String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+
+        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    public void shouldNotReturnCloserThanWhenWeightlessThanZero() {
+        String sourceNode = nodeNames[1];
+        String weight = "-1";
+        String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+
+        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+
+        assertEquals(expectedResponse, response);
+    }
 }

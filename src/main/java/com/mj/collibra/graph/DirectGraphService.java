@@ -48,4 +48,13 @@ public interface DirectGraphService {
      */
     String shortestPath(String nodeXName, String nodeYName);
 
+    /**
+     * Return list of node closer to nodeName that the given weight
+     *
+     * @param weight - max sum of weight
+     * @param nodeName - start node name
+     * @return response to client
+     */
+    String closerThan(String weight, String nodeName);
+
 }

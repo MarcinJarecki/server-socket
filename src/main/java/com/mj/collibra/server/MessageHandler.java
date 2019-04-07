@@ -164,9 +164,10 @@ public class MessageHandler implements Runnable {
                 response = directGraphServiceImpl.shortestPath(nodeX, nodeY);
                 break;
             case CLOSER_THAN:
-                response = "[Phase4-Node-0]";
+                nodeX = arguments[0];
+                edgeWeight = arguments[1];
+                response = directGraphServiceImpl.closerThan(nodeX, edgeWeight);
                 break;
-
             default:
                 response = getUndefinedCommandResponse();;
                 break;

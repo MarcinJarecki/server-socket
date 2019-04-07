@@ -158,6 +158,34 @@ public class DirectGraphServiceImpl implements DirectGraphService {
         }
     }
 
+    @Override
+    public String closerThan(String weightString, String nodeName) {
+        int weight = 0;
+        int minWeight = 0;
+        try {
+            weight = Integer.parseInt(weightString);
+        } catch (NumberFormatException e) {
+            log.warn("Problem with parse weight in closerThan = {}", weightString, e);
+        }
+
+        readLock.lock();
+        try {
+            if (nodeName != null && weight > minWeight) {
+                GraphNode nodeX = new GraphNode(nodeName);
+                if (isNodeExist(nodeX) ) {
+
+                    return "";
+                } else {
+                    return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+                }
+            } else {
+                return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+            }
+        } finally {
+            readLock.unlock();
+        }
+    }
+
     private void getPathsToDestinationNode2(GraphNode source) {
         settledNodes = new HashSet<>();
         unSettledNodes = new HashSet<>();
