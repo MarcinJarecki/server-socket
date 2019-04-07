@@ -1,6 +1,6 @@
 package com.mj.collibra.server;
 
-import com.mj.collibra.graph.DirectGraphService;
+import com.mj.collibra.graph.DirectGraphServiceImpl;
 import com.mj.collibra.chat.ChatService;
 import com.mj.collibra.command.parser.CommandParserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -29,15 +29,15 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
     private CommandParserServiceImpl commandService;
 
     private ExecutorService executor = null;
-    private DirectGraphService directGraphService;
+    private DirectGraphServiceImpl directGraphServiceImpl;
 
     @Autowired
     public SocketServer(@Qualifier("ChatService") ChatService chatService,
                         CommandParserServiceImpl commandService,
-                        DirectGraphService directGraphService) {
+                        DirectGraphServiceImpl directGraphServiceImpl) {
         this.chatService = chatService;
         this.commandService = commandService;
-        this.directGraphService = directGraphService;
+        this.directGraphServiceImpl = directGraphServiceImpl;
     }
 
     @Override
@@ -53,12 +53,12 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             // TODO to pool
             executor = Executors.newFixedThreadPool(10);
 
-            directGraphService = new DirectGraphService();
+            directGraphServiceImpl = new DirectGraphServiceImpl();
 
             //noinspection InfiniteLoopStatement
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                Runnable worker = new MessageHandler(clientSocket, chatService, commandService, directGraphService);
+                Runnable worker = new MessageHandler(clientSocket, chatService, commandService, directGraphServiceImpl);
                 executor.execute(worker);
             }
         } catch (IOException e) {

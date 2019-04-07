@@ -1,6 +1,6 @@
 package com.mj.collibra.server;
 
-import com.mj.collibra.graph.DirectGraphService;
+import com.mj.collibra.graph.DirectGraphServiceImpl;
 import com.mj.collibra.chat.ChatService;
 import com.mj.collibra.command.parser.CommandParserServiceImpl;
 import com.mj.collibra.command.enums.CommonServerCommand;
@@ -17,7 +17,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -30,7 +29,7 @@ public class MessageHandler implements Runnable {
     private final ChatService chatService;
     private final Socket clientSocket;
     private final CommandParserServiceImpl commandParserService;
-    private final DirectGraphService directGraphService;
+    private final DirectGraphServiceImpl directGraphServiceImpl;
 
     private String clientName;
     private LocalDateTime chatStartTime;
@@ -39,11 +38,11 @@ public class MessageHandler implements Runnable {
 
     private String serverSayLog = "Server say: {}";
 
-    MessageHandler(Socket clientSocket, ChatService chatService, CommandParserServiceImpl commandParserService, DirectGraphService directGraphService) {
+    MessageHandler(Socket clientSocket, ChatService chatService, CommandParserServiceImpl commandParserService, DirectGraphServiceImpl directGraphServiceImpl) {
         this.clientSocket = clientSocket;
         this.chatService = chatService;
         this.commandParserService = commandParserService;
-        this.directGraphService = directGraphService;
+        this.directGraphServiceImpl = directGraphServiceImpl;
     }
 
     @Override
@@ -59,8 +58,12 @@ public class MessageHandler implements Runnable {
 
 
             String message;
+            boolean startChat = false;
             while ((message = in.readLine()) != null) {
-                chatStartTime = LocalDateTime.now();
+                if (!startChat) {
+                    chatStartTime = LocalDateTime.now();
+                    startChat = true;
+                }
 
                 if (scheduledFuture != null) {
                     scheduledFuture.cancel(true);
@@ -138,27 +141,27 @@ public class MessageHandler implements Runnable {
         switch (graphClientCommand) {
             case ADD_NODE:
                 nodeName = arguments[0];
-                response = directGraphService.addNode(nodeName);
+                response = directGraphServiceImpl.addNode(nodeName);
                 break;
             case REMOVE_NODE:
                 nodeName = arguments[0];
-                response = directGraphService.removeNode(nodeName);
+                response = directGraphServiceImpl.removeNode(nodeName);
                 break;
             case ADD_EDGE:
                 nodeX = arguments[0];
                 nodeY = arguments[1];
                 edgeWeight = arguments[2];
-                response = directGraphService.addEdge(nodeX, nodeY, edgeWeight);
+                response = directGraphServiceImpl.addEdge(nodeX, nodeY, edgeWeight);
                 break;
             case REMOVE_EDGE:
                 nodeX = arguments[0];
                 nodeY = arguments[1];
-                response = directGraphService.removeEdge(nodeX, nodeY);
+                response = directGraphServiceImpl.removeEdge(nodeX, nodeY);
                 break;
             case SHORTES_PATH:
                 nodeX = arguments[0];
                 nodeY = arguments[1];
-                response = directGraphService.shortestPath(nodeX, nodeY);
+                response = directGraphServiceImpl.shortestPath(nodeX, nodeY);
                 break;
             case CLOSER_THAN:
                 response = "[Phase4-Node-0]";
