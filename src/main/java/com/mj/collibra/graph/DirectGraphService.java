@@ -6,7 +6,10 @@ import com.mj.collibra.command.enums.GraphServerCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -126,12 +129,73 @@ public class DirectGraphService {
         }
     }
 
+    public String shortestPath(String nodeXName, String nodeYName) {
+        readLock.lock();
+        try {
+            int result = Integer.MAX_VALUE;
+            List<List<GraphEdge>> graphPaths = new ArrayList<>();
+            if (nodeXName != null && nodeYName != null) {
+                GraphNode nodeX = new GraphNode(nodeXName);
+                GraphNode nodeY = new GraphNode(nodeYName);
+                if (isNodeExist(nodeX) && isNodeExist(nodeY)) {
+                    List<GraphEdge> path = new LinkedList<>();
+                    graphPaths = getAllPaths(nodeX, nodeY, path, graphPaths);
+
+                    return Integer.toString(graphPaths.size());
+                } else {
+                    return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+                }
+            } else {
+                return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+            }
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    private List<List<GraphEdge>> getAllPaths(GraphNode startNode, GraphNode endNode, List<GraphEdge> path, List<List<GraphEdge>> graphPaths) {
+        List<GraphEdge> edges = adjacencyNodes.get(startNode);
+
+        if(path.isEmpty()) {
+            path.add(new GraphEdge(startNode, 0));
+        }
+
+        if (edges == null) {
+            graphPaths.add(path);
+            return graphPaths;
+        }
+
+        if (startNode == endNode) {
+            return  graphPaths;
+        }
+
+            edges.forEach(edge -> {
+                if (!path.contains(edge)) {
+                    path.add(edge);
+                    log.warn("ADD to path = {}, path = {}", edge.getNode().getName(), path.toString());
+                    getAllPaths(edge.getNode(), endNode, path, graphPaths);
+                    path.remove(edge);
+                }
+
+            });
+            return graphPaths;
+
+    }
+
     private boolean isNodeExist(GraphNode node) {
         if (adjacencyNodes.size() > 0) {
             return adjacencyNodes.containsKey(node);
         } else {
             return false;
         }
+    }
+
+    private GraphEdge getGraphEdge(List<GraphEdge> adjacencyNodes, GraphNode node) {
+        Optional<GraphEdge> result = adjacencyNodes.stream()
+                .filter(edge -> edge.getNode().equals(node))
+                .findFirst();
+        return result.orElse(null);
+
     }
 
 

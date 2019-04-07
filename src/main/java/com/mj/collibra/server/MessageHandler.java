@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -125,7 +126,7 @@ public class MessageHandler implements Runnable {
     }
 
     private String handleWithGraphCommand(CommandData commandData) {
-        String response = getUndefinedCommandResponse();
+        String response;
         String nodeName;
         String nodeX;
         String nodeY;
@@ -154,22 +155,27 @@ public class MessageHandler implements Runnable {
                 nodeY = arguments[1];
                 response = directGraphService.removeEdge(nodeX, nodeY);
                 break;
-            case CLOSER_THAN:
-                break;
             case SHORTES_PATH:
+                nodeX = arguments[0];
+                nodeY = arguments[1];
+                response = directGraphService.shortestPath(nodeX, nodeY);
                 break;
+            case CLOSER_THAN:
+                response = "[Phase4-Node-0]";
+                break;
+
             default:
-                response = getUndefinedCommandResponse();
+                response = getUndefinedCommandResponse();;
                 break;
         }
-        log.debug(serverSayLog, response);
+        log.debug("MAIN - " + serverSayLog, response);
         return response;
     }
 
 
     private String getUndefinedCommandResponse() {
         String response = CommonServerCommand.NOT_SUPPORTED_COMMAND.getCommandName();
-        log.debug(serverSayLog, response);
+        log.debug(serverSayLog, "UNDEFINED - " + response);
         return response;
     }
 
