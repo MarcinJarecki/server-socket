@@ -79,13 +79,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
     public String addEdge(String nodeXName, String nodeYName, String weightEdge) {
         writeLock.lock();
         try {
-            int weight = 0;
-            try {
-                weight = Integer.parseInt(weightEdge);
-            } catch (NumberFormatException e) {
-                log.warn("Problem with parse weight node = {}", weightEdge, e);
-            }
-
+            int weight = parseStringToInt(weightEdge);
             if (nodeXName != null && nodeYName != null) {
                 GraphNode nodeX = new GraphNode(nodeXName);
                 GraphNode nodeY = new GraphNode(nodeYName);
@@ -157,21 +151,28 @@ public class DirectGraphServiceImpl implements DirectGraphService {
 
     @Override
     public String closerThan(String weightString, String nodeName) {
-        int weight = 0;
-        int minWeight = 0;
+        writeLock.lock();
         try {
-            weight = Integer.parseInt(weightString);
-        } catch (NumberFormatException e) {
-            log.warn("Problem with parse weight in closerThan = {}", weightString, e);
-        }
-
-        readLock.lock();
-        try {
+            int minWeight = 0;
+            final int weight = parseStringToInt(weightString);
             if (nodeName != null && weight > minWeight) {
                 GraphNode nodeX = new GraphNode(nodeName);
                 if (isNodeExist(nodeX) ) {
+                    createShortestPathAndDistance(nodeX);
+                    HashSet<String> resultNodesName = new HashSet<>();
+                    distance.forEach((node, dist) -> {
+                        if (dist < weight && dist >0) {
+                            resultNodesName.add(node.getName());
+                        }
+                    });
+                    String result;
+                    if (resultNodesName.isEmpty()) {
+                        result = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+                    } else {
+                        result = resultNodesName.toString();
+                    }
 
-                    return "";
+                    return result;
                 } else {
                     return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
                 }
@@ -179,15 +180,15 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                 return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
         } finally {
-            readLock.unlock();
+            writeLock.unlock();
         }
     }
 
     private void createShortestPathAndDistance(GraphNode source) {
         settledNodes = new HashSet<>();
         unSettledNodes = new HashSet<>();
-        distance = new HashMap<>();
-        predecessors = new HashMap<>();
+        distance = new HashMap<>(adjacencyNodes.size());
+        predecessors = new HashMap<>(adjacencyNodes.size());
 
         distance.put(source, 0);
         unSettledNodes.add(source);
@@ -258,21 +259,6 @@ public class DirectGraphServiceImpl implements DirectGraphService {
         }
     }
 
-    private List<GraphNode> getPath(GraphNode target) {
-        LinkedList<GraphNode> path = new LinkedList<>();
-        GraphNode step = target;
-        if (predecessors.get(step) == null) {
-            return new ArrayList<>();
-        }
-        path.add(step);
-        while (predecessors.get(step) != null) {
-            step = predecessors.get(step);
-            path.add(step);
-        }
-        Collections.reverse(path);
-        return path;
-    }
-
     private int getDistanceWeight(GraphNode target) {
         if (distance.get(target) == null) {
             return Integer.MAX_VALUE;
@@ -287,6 +273,16 @@ public class DirectGraphServiceImpl implements DirectGraphService {
         } else {
             return false;
         }
+    }
+
+    private int parseStringToInt(String valueString) {
+        int value = 0;
+        try {
+            value = Integer.parseInt(valueString);
+        } catch (NumberFormatException e) {
+            log.warn("Problem with parse string to in = {}", valueString, e);
+        }
+        return value;
     }
 
 

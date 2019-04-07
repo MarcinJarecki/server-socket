@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashSet;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
@@ -245,11 +246,40 @@ public class DirectGraphServiceImplTest {
     public void shouldReturnCloserThanCase1() {
         String sourceNode = nodeNames[0];
         String weight = "5";
-        String expectedResponse = nodeNames[1] + "," +nodeNames[2];
+        HashSet<String> expectedResponse = new HashSet<>(2);
+        expectedResponse.add(nodeNames[1]);
+        expectedResponse.add(nodeNames[2]);
 
         String response = directGraphServiceImpl.closerThan(weight, sourceNode);
 
         assertEquals(expectedResponse.toString(), response);
+    }
+
+    @Test
+    public void shouldReturnCloserThanCase2() {
+        String sourceNode = nodeNames[4];
+        String weight = "10";
+        HashSet<String> expectedResponse = new HashSet<>(2);
+        expectedResponse.add(nodeNames[0]);
+        expectedResponse.add(nodeNames[1]);
+        expectedResponse.add(nodeNames[2]);
+        expectedResponse.add(nodeNames[3]);
+        expectedResponse.add(nodeNames[5]);
+
+        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+
+        assertEquals(expectedResponse.toString(), response);
+    }
+
+    @Test
+    public void shouldReturnCloserThanCase3() {
+        String sourceNode = nodeNames[5];
+        String weight = "1";
+        String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+
+        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+
+        assertEquals(expectedResponse, response);
     }
 
     @Test
