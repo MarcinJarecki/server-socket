@@ -135,17 +135,14 @@ public class DirectGraphServiceImpl implements DirectGraphService {
 
     @Override
     public String shortestPath(String nodeXName, String nodeYName) {
-        readLock.lock();
+        writeLock.lock();
         try {
             if (nodeXName != null && nodeYName != null) {
                 GraphNode nodeX = new GraphNode(nodeXName);
                 GraphNode nodeY = new GraphNode(nodeYName);
                 if (isNodeExist(nodeX) && isNodeExist(nodeY)) {
-                    getPathsToDestinationNode2(nodeX);
-                    List<GraphNode> shortestPath = getPath(nodeY);
-
+                    createShortestPathAndDistance(nodeX);
                     int weightShortestPath = getDistanceWeight(nodeY);
-
                     return Integer.toString(weightShortestPath);
                 } else {
                     return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
@@ -154,7 +151,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                 return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
         } finally {
-            readLock.unlock();
+            writeLock.unlock();
         }
     }
 
@@ -186,7 +183,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
         }
     }
 
-    private void getPathsToDestinationNode2(GraphNode source) {
+    private void createShortestPathAndDistance(GraphNode source) {
         settledNodes = new HashSet<>();
         unSettledNodes = new HashSet<>();
         distance = new HashMap<>();
