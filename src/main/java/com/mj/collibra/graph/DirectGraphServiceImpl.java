@@ -22,7 +22,6 @@ public class DirectGraphServiceImpl implements DirectGraphService {
 
     private Set<GraphNode> settledNodes;
     private Set<GraphNode> unSettledNodes;
-    private Map<GraphNode, GraphNode> predecessors;
     private Map<GraphNode, Integer> distance;
 
     private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -188,7 +187,6 @@ public class DirectGraphServiceImpl implements DirectGraphService {
         settledNodes = new HashSet<>();
         unSettledNodes = new HashSet<>();
         distance = new HashMap<>(adjacencyNodes.size());
-        predecessors = new HashMap<>(adjacencyNodes.size());
 
         distance.put(source, 0);
         unSettledNodes.add(source);
@@ -219,7 +217,6 @@ public class DirectGraphServiceImpl implements DirectGraphService {
         for (GraphNode target : adjacentNodes) {
             if (getShortestDistance(target) > getShortestDistance(node) + getDistance(node, target)) {
                 distance.put(target, getShortestDistance(node) + getDistance(node, target));
-                predecessors.put(target, node);
                 unSettledNodes.add(target);
             }
         }
