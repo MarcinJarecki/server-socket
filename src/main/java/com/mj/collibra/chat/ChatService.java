@@ -34,6 +34,6 @@ public interface ChatService {
      * @param chatStartTime - star chat time
      * @return - end chat session server response
      */
-    String endSessionResponse(String clientName, LocalDateTime chatStartTime);
+    String endSessionResponse(String clientName, long chatStartTime);
 
 }

@@ -161,7 +161,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                     List<String> resultNodesName = new ArrayList<>();
                     distance.forEach((node, dist) -> {
                         if (dist < weight && !node.getName().equals(nodeName)) {
-                            resultNodesName.add(node.getName().trim());
+                            resultNodesName.add(node.getName());
                         }
                     });
                     Collections.sort(resultNodesName);

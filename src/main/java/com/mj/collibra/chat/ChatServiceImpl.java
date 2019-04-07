@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -48,9 +49,10 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public String endSessionResponse(String clientName, LocalDateTime chatStartTime) {
+    public String endSessionResponse(String clientName, long chatStartTime) {
         if (clientName == null) {clientName = "";}
-        long chatDuration =  Duration.between(chatStartTime, LocalDateTime.now()).getSeconds() * 1000;
+        long chatDuration = Instant.now().toEpochMilli() - chatStartTime;
+
         return new StringBuffer ()
                 .append(ChatServerCommand.END_PART_1.getCommandName())
                 .append(clientName)

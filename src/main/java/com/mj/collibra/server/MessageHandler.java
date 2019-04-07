@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -32,7 +33,7 @@ public class MessageHandler implements Runnable {
     private final DirectGraphServiceImpl directGraphServiceImpl;
 
     private String clientName;
-    private LocalDateTime chatStartTime;
+    private long chatStartTime;
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> scheduledFuture = null;
 
@@ -61,7 +62,7 @@ public class MessageHandler implements Runnable {
             boolean startChat = false;
             while ((message = in.readLine()) != null) {
                 if (!startChat) {
-                    chatStartTime = LocalDateTime.now();
+                    chatStartTime = Instant.now().toEpochMilli();
                     startChat = true;
                 }
 

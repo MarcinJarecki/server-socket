@@ -13,5 +13,5 @@ import java.time.LocalDateTime;
 public class ChatClientMessage {
     private String clientName;
     private String clientMessage;
-    private LocalDateTime charStartTime;
+    private long charStartTime;
 }
