@@ -58,7 +58,13 @@ public class CommandParserServiceImpl implements CommandParserService {
     private String[] getCommandParameters(Command command, String message) {
         int countOfSpaceAfterCommand = 1;
         String parameters = message.substring(command.getLength() + countOfSpaceAfterCommand);
-        return parameters.split(" ");
+        String[] result = parameters.split(" ");
+        int pos = 0;
+        for(String res: result){
+            result[pos] = res.trim();
+            pos++;
+        }
+        return result;
     }
 
 }

@@ -50,7 +50,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
 
     @Override
     public String removeNode(String name) {
-        readLock.lock();
+        writeLock.lock();
         try {
             if (name != null) {
                 GraphNode node = new GraphNode(name);
@@ -70,7 +70,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                 return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
         } finally {
-            readLock.unlock();
+            writeLock.unlock();
         }
     }
 
@@ -100,7 +100,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
 
     @Override
     public String removeEdge(String nodeXName, String nodeYName) {
-        readLock.lock();
+        writeLock.lock();
         try {
             if (nodeXName != null && nodeYName != null) {
                 GraphNode nodeX = new GraphNode(nodeXName);
@@ -122,7 +122,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                 return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
         } finally {
-            readLock.unlock();
+            writeLock.unlock();
         }
     }
 
@@ -158,20 +158,14 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                 GraphNode nodeX = new GraphNode(nodeName);
                 if (isNodeExist(nodeX) ) {
                     createShortestPathAndDistance(nodeX);
-                    HashSet<String> resultNodesName = new HashSet<>();
+                    List<String> resultNodesName = new ArrayList<>();
                     distance.forEach((node, dist) -> {
-                        if (dist < weight && dist >0) {
-                            resultNodesName.add(node.getName());
+                        if (dist < weight && !node.getName().equals(nodeName)) {
+                            resultNodesName.add(node.getName().trim());
                         }
                     });
-                    String result;
-                    if (resultNodesName.isEmpty()) {
-                        result = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
-                    } else {
-                        result = resultNodesName.toString();
-                    }
-
-                    return result;
+                    Collections.sort(resultNodesName);
+                    return resultNodesName.toString();
                 } else {
                     return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
                 }

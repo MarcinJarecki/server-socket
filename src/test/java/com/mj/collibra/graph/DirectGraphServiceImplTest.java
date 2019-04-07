@@ -275,7 +275,7 @@ public class DirectGraphServiceImplTest {
     public void shouldReturnCloserThanCase3() {
         String sourceNode = nodeNames[5];
         String weight = "1";
-        String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+        String expectedResponse = "[]";
 
         String response = directGraphServiceImpl.closerThan(weight, sourceNode);
 
