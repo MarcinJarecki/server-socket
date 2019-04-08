@@ -157,12 +157,12 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                         }
                     });
                     Collections.sort(resultNodesName);
-                    return resultNodesName.toString();
+                    return String.join(",", resultNodesName);
                 } else {
                     return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
                 }
             } else {
-                return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+                return "";
             }
         } finally {
             writeLock.unlock();

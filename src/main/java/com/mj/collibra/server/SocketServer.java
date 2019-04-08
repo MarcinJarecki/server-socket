@@ -2,6 +2,7 @@ package com.mj.collibra.server;
 
 import com.mj.collibra.command.CommandResponseService;
 import com.mj.collibra.chat.ChatService;
+import com.mj.collibra.common.ConfigurationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,8 +12,7 @@ import org.springframework.stereotype.Component;
 
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -26,37 +26,42 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
 
     private final CommandResponseService commandResponseService;
     private final ChatService chatService;
+    private final ConfigurationService configurationService;
 
     private ExecutorService executor = null;
 
 
     @Autowired
     public SocketServer(@Qualifier("ChatService") ChatService chatService,
-                        CommandResponseService commandResponseService) {
+                        CommandResponseService commandResponseService,
+                        ConfigurationService configurationService) {
         this.chatService = chatService;
         this.commandResponseService = commandResponseService;
+        this.configurationService = configurationService;
     }
 
     @Override
     public void onApplicationEvent(final ApplicationReadyEvent event) {
-        int port = 50000;
-        String hostName = "localhost";
+        try (ServerSocket serverSocket = new ServerSocket()) {
+            InetAddress inetAddress = InetAddress.getByName(configurationService.getHostName());
+            InetSocketAddress inetSocketAddress = new InetSocketAddress(inetAddress, configurationService.getPort());
+            serverSocket.bind(inetSocketAddress);
+            log.info("--------------------------------------------------------------------");
+            log.info("-- SERVER START on: {} port: {}", inetSocketAddress.getAddress(), inetSocketAddress.getPort());
+            log.info("--------------------------------------------------------------------");
 
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            log.info("--------------------------------------------------------------------");
-            log.info("-- SERVER START on host:port: {}:{}", hostName, port);
-            log.info("--------------------------------------------------------------------");
 
             // TODO to pool
             executor = Executors.newFixedThreadPool(10);
 
-
-            //noinspection InfiniteLoopStatement
+            // noinspection InfiniteLoopStatement
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 Runnable worker = new MessageHandler(clientSocket, commandResponseService, chatService);
                 executor.execute(worker);
             }
+        } catch (UnknownHostException e) {
+            log.error("Cannon resolve hostName", e);
         } catch (IOException e) {
             log.error("Problem with start server socket", e);
         } finally {
