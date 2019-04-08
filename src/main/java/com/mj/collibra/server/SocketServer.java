@@ -1,8 +1,11 @@
 package com.mj.collibra.server;
 
+import com.mj.collibra.command.CommandResponseService;
+import com.mj.collibra.command.parser.CommandParserService;
 import com.mj.collibra.graph.DirectGraphServiceImpl;
 import com.mj.collibra.chat.ChatService;
 import com.mj.collibra.command.parser.CommandParserServiceImpl;
+import com.mj.collibra.graph.algorithm.ShortestPathsFromSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,19 +28,17 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SocketServer implements ApplicationListener<ApplicationReadyEvent> {
 
-    private ChatService chatService;
-    private CommandParserServiceImpl commandService;
+    private final CommandResponseService commandResponseService;
+    private final ChatService chatService;
 
     private ExecutorService executor = null;
-    private DirectGraphServiceImpl directGraphServiceImpl;
+
 
     @Autowired
     public SocketServer(@Qualifier("ChatService") ChatService chatService,
-                        CommandParserServiceImpl commandService,
-                        DirectGraphServiceImpl directGraphServiceImpl) {
+                        CommandResponseService commandResponseService) {
         this.chatService = chatService;
-        this.commandService = commandService;
-        this.directGraphServiceImpl = directGraphServiceImpl;
+        this.commandResponseService = commandResponseService;
     }
 
     @Override
@@ -53,12 +54,11 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             // TODO to pool
             executor = Executors.newFixedThreadPool(10);
 
-            directGraphServiceImpl = new DirectGraphServiceImpl();
 
             //noinspection InfiniteLoopStatement
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                Runnable worker = new MessageHandler(clientSocket, chatService, commandService, directGraphServiceImpl);
+                Runnable worker = new MessageHandler(clientSocket, commandResponseService, chatService);
                 executor.execute(worker);
             }
         } catch (IOException e) {

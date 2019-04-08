@@ -1,9 +1,10 @@
 package com.mj.collibra.graph;
 
 import com.mj.collibra.command.enums.GraphServerCommand;
+import com.mj.collibra.graph.algorithm.ShortestPathsFromSource;
+import com.mj.collibra.model.Graph;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -12,7 +13,7 @@ import static junit.framework.TestCase.assertNotNull;
 
 public class DirectGraphServiceImplTest {
 
-    private DirectGraphServiceImpl directGraphServiceImpl;
+    private DirectGraphService directGraphService;
 
     private String[] nodeNames = {"0", "1", "2", "3", "4", "5"};
     // source, destination, weight
@@ -30,15 +31,15 @@ public class DirectGraphServiceImplTest {
 
     @Before
     public void setUp() {
-        directGraphServiceImpl = new DirectGraphServiceImpl();
-        Arrays.stream(nodeNames).forEach(nodeName -> directGraphServiceImpl.addNode(nodeName));
-        Arrays.stream(edges).forEach(edge -> directGraphServiceImpl.addEdge(edge[0], edge[1], edge[2]));
+        ShortestPathsFromSource shortestPathsFromSource = new ShortestPathsFromSource();
+        directGraphService = new DirectGraphServiceImpl(shortestPathsFromSource);
+        Arrays.stream(nodeNames).forEach(nodeName -> directGraphService.addNode(nodeName));
+        Arrays.stream(edges).forEach(edge -> directGraphService.addEdge(edge[0], edge[1], edge[2]));
     }
-
 
     @Test
     public void shouldGraphBeDefined() {
-        assertNotNull(directGraphServiceImpl);
+        assertNotNull(directGraphService);
     }
 
     @Test
@@ -46,7 +47,7 @@ public class DirectGraphServiceImplTest {
         String newNodeName = "999";
         String expectedResponse = GraphServerCommand.NODE_ADDED.getCommandName();
 
-        String response = directGraphServiceImpl.addNode(newNodeName);
+        String response = directGraphService.addNode(newNodeName);
 
         assertEquals(expectedResponse, response);
     }
@@ -56,7 +57,7 @@ public class DirectGraphServiceImplTest {
         String existedNode = nodeNames[1];
         String expectedResponse = GraphServerCommand.NODE_ALREADY_EXISTS.getCommandName();
 
-        String response = directGraphServiceImpl.addNode(existedNode);
+        String response = directGraphService.addNode(existedNode);
 
         assertEquals(expectedResponse, response);
     }
@@ -66,7 +67,7 @@ public class DirectGraphServiceImplTest {
         String existedNode = nodeNames[1];
         String expectedResponse = GraphServerCommand.NODE_REMOVED.getCommandName();
 
-        String response = directGraphServiceImpl.removeNode(existedNode);
+        String response = directGraphService.removeNode(existedNode);
 
         assertEquals(expectedResponse, response);
     }
@@ -76,7 +77,7 @@ public class DirectGraphServiceImplTest {
         String newNodeName = "999";
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.removeNode(newNodeName);
+        String response = directGraphService.removeNode(newNodeName);
 
         assertEquals(expectedResponse, response);
     }
@@ -88,7 +89,7 @@ public class DirectGraphServiceImplTest {
         String[] edge = {sourceNode, destinationNode, "15"};
         String expectedResponse = GraphServerCommand.EDGE_ADDED.getCommandName();
 
-        String response = directGraphServiceImpl.addEdge(edge[0], edge[1], edge[2]);
+        String response = directGraphService.addEdge(edge[0], edge[1], edge[2]);
 
         assertEquals(expectedResponse, response);
     }
@@ -100,7 +101,7 @@ public class DirectGraphServiceImplTest {
         String[] edge = {sourceNode, destinationNode, "15"};
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.addEdge(edge[0], edge[1], edge[2]);
+        String response = directGraphService.addEdge(edge[0], edge[1], edge[2]);
 
         assertEquals(expectedResponse, response);
     }
@@ -112,7 +113,7 @@ public class DirectGraphServiceImplTest {
         String[] edge = {sourceNode, destinationNode, "15"};
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.addEdge(edge[0], edge[1], edge[2]);
+        String response = directGraphService.addEdge(edge[0], edge[1], edge[2]);
 
         assertEquals(expectedResponse, response);
     }
@@ -124,7 +125,7 @@ public class DirectGraphServiceImplTest {
         String[] edge = {sourceNode, destinationNode};
         String expectedResponse = GraphServerCommand.EDGE_REMOVED.getCommandName();
 
-        String response = directGraphServiceImpl.removeEdge(edge[0], edge[1]);
+        String response = directGraphService.removeEdge(edge[0], edge[1]);
 
         assertEquals(expectedResponse, response);
     }
@@ -136,7 +137,7 @@ public class DirectGraphServiceImplTest {
         String[] edge = {sourceNode, destinationNode};
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.removeEdge(edge[0], edge[1]);
+        String response = directGraphService.removeEdge(edge[0], edge[1]);
 
         assertEquals(expectedResponse, response);
     }
@@ -148,7 +149,7 @@ public class DirectGraphServiceImplTest {
         String[] edge = {sourceNode, destinationNode};
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.removeEdge(edge[0], edge[1]);
+        String response = directGraphService.removeEdge(edge[0], edge[1]);
 
         assertEquals(expectedResponse, response);
     }
@@ -159,7 +160,7 @@ public class DirectGraphServiceImplTest {
         String destinationNode = nodeNames[5];
         String shortestPathWeight = "10";
 
-        String result = directGraphServiceImpl.shortestPath(sourceNode, destinationNode);
+        String result = directGraphService.shortestPath(sourceNode, destinationNode);
 
         assertEquals(shortestPathWeight, result);
     }
@@ -170,7 +171,7 @@ public class DirectGraphServiceImplTest {
         String destinationNode = nodeNames[0];
         String shortestPathWeight = Integer.toString(Integer.MAX_VALUE);
 
-        String result = directGraphServiceImpl.shortestPath(sourceNode, destinationNode);
+        String result = directGraphService.shortestPath(sourceNode, destinationNode);
 
         assertEquals(shortestPathWeight, result);
     }
@@ -181,7 +182,7 @@ public class DirectGraphServiceImplTest {
         String destinationNode = nodeNames[5];
         String shortestPathWeight = "14";
 
-        String result = directGraphServiceImpl.shortestPath(sourceNode, destinationNode);
+        String result = directGraphService.shortestPath(sourceNode, destinationNode);
 
         assertEquals(shortestPathWeight, result);
     }
@@ -192,7 +193,7 @@ public class DirectGraphServiceImplTest {
         String destinationNode = nodeNames[3];
         String shortestPathWeight = "2";
 
-        String result = directGraphServiceImpl.shortestPath(sourceNode, destinationNode);
+        String result = directGraphService.shortestPath(sourceNode, destinationNode);
 
         assertEquals(shortestPathWeight, result);
     }
@@ -203,7 +204,7 @@ public class DirectGraphServiceImplTest {
         String destinationNode = nodeNames[1];
         String shortestPathWeight = "0";
 
-        String result = directGraphServiceImpl.shortestPath(sourceNode, destinationNode);
+        String result = directGraphService.shortestPath(sourceNode, destinationNode);
 
         assertEquals(shortestPathWeight, result);
     }
@@ -214,7 +215,7 @@ public class DirectGraphServiceImplTest {
         String destinationNode = nodeNames[0];
         String shortestPathWeight = "8";
 
-        String result = directGraphServiceImpl.shortestPath(sourceNode, destinationNode);
+        String result = directGraphService.shortestPath(sourceNode, destinationNode);
 
         assertEquals(shortestPathWeight, result);
     }
@@ -225,7 +226,7 @@ public class DirectGraphServiceImplTest {
         String destinationNode = nodeNames[2];
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.shortestPath(sourceNode, destinationNode);
+        String response = directGraphService.shortestPath(sourceNode, destinationNode);
 
         assertEquals(expectedResponse, response);
     }
@@ -236,7 +237,7 @@ public class DirectGraphServiceImplTest {
         String destinationNode = "999";
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.removeEdge(sourceNode, destinationNode);
+        String response = directGraphService.removeEdge(sourceNode, destinationNode);
 
         assertEquals(expectedResponse, response);
     }
@@ -250,7 +251,7 @@ public class DirectGraphServiceImplTest {
         expectedResponse.add(nodeNames[1]);
         expectedResponse.add(nodeNames[2]);
 
-        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+        String response = directGraphService.closerThan(weight, sourceNode);
 
         assertEquals(expectedResponse.toString(), response);
     }
@@ -266,7 +267,7 @@ public class DirectGraphServiceImplTest {
         expectedResponse.add(nodeNames[3]);
         expectedResponse.add(nodeNames[5]);
 
-        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+        String response = directGraphService.closerThan(weight, sourceNode);
 
         assertEquals(expectedResponse.toString(), response);
     }
@@ -277,7 +278,7 @@ public class DirectGraphServiceImplTest {
         String weight = "1";
         String expectedResponse = "[]";
 
-        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+        String response = directGraphService.closerThan(weight, sourceNode);
 
         assertEquals(expectedResponse, response);
     }
@@ -288,7 +289,7 @@ public class DirectGraphServiceImplTest {
         String weight = "10";
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+        String response = directGraphService.closerThan(weight, sourceNode);
 
         assertEquals(expectedResponse, response);
     }
@@ -299,7 +300,7 @@ public class DirectGraphServiceImplTest {
         String weight = "-1";
         String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
 
-        String response = directGraphServiceImpl.closerThan(weight, sourceNode);
+        String response = directGraphService.closerThan(weight, sourceNode);
 
         assertEquals(expectedResponse, response);
     }
