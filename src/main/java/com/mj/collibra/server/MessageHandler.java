@@ -31,7 +31,7 @@ public class MessageHandler implements Runnable {
 
     private static final String SERVER_SAY_LOG = "Server say: {}";
 
-    MessageHandler(Socket clientSocket, CommandResponseService commandResponseService,  ChatService chatService) {
+    MessageHandler(Socket clientSocket, CommandResponseService commandResponseService, ChatService chatService) {
         this.clientSocket = clientSocket;
         this.commandResponseService = commandResponseService;
         this.chatService = chatService;

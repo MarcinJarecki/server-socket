@@ -148,7 +148,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
             final int weight = parseStringToInt(weightString);
             if (nodeName != null && weight > minWeight) {
                 GraphNode nodeX = new GraphNode(nodeName);
-                if (graph.isNodeExist(nodeX) ) {
+                if (graph.isNodeExist(nodeX)) {
                     Map<GraphNode, Integer> dist = shortestPathsFromSource.calculate(graph, nodeX);
                     List<String> resultNodesName = new ArrayList<>();
                     dist.forEach((node, value) -> {
