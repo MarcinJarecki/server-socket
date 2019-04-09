@@ -3,8 +3,6 @@ package com.mj.collibra.model;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 /**
  * @author Marcin Jarecki
  */

@@ -120,7 +120,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
 
     @Override
     public String shortestPath(String nodeXName, String nodeYName) {
-        writeLock.lock();
+        readLock.lock();
         try {
             if (nodeXName != null && nodeYName != null) {
                 GraphNode nodeX = new GraphNode(nodeXName);
@@ -136,13 +136,13 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                 return GraphServerCommand.NODE_NOT_FOUND.getCommandName();
             }
         } finally {
-            writeLock.unlock();
+            readLock.unlock();
         }
     }
 
     @Override
     public String closerThan(String weightString, String nodeName) {
-        writeLock.lock();
+        readLock.lock();
         try {
             int minWeight = 0;
             final int weight = parseStringToInt(weightString);
@@ -165,7 +165,7 @@ public class DirectGraphServiceImpl implements DirectGraphService {
                 return "";
             }
         } finally {
-            writeLock.unlock();
+            readLock.unlock();
         }
     }
 

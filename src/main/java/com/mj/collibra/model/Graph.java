@@ -1,6 +1,5 @@
 package com.mj.collibra.model;
 
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 

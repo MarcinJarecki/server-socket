@@ -1,7 +1,5 @@
 package com.mj.collibra.graph;
 
-import com.mj.collibra.model.Graph;
-
 /**
  * @author Marcin Jarecki
  */

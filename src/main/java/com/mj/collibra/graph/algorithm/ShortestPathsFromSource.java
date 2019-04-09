@@ -19,9 +19,7 @@ public class ShortestPathsFromSource {
 
         Map<GraphNode, Integer> distance = new HashMap<>(graph.getAdjacencyNodes().size());
 
-        graph.getAdjacencyNodes().forEach((node, list) -> {
-            distance.put(node, Integer.MAX_VALUE);
-        });
+        graph.getAdjacencyNodes().forEach((node, list) -> distance.put(node, Integer.MAX_VALUE));
 
         distance.put(source, 0);
 
@@ -29,7 +27,7 @@ public class ShortestPathsFromSource {
         Set<GraphNode> unsettledNodes = new HashSet<>();
         unsettledNodes.add(source);
 
-        while (unsettledNodes.size() != 0) {
+        while (!unsettledNodes.isEmpty()) {
             GraphNode currentNode = getLowestDistanceNode(unsettledNodes, distance);
             unsettledNodes.remove(currentNode);
             for (GraphEdge graphEdge : graph.getAdjacencyNodes().get(currentNode)) {
