@@ -18,7 +18,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public String startSessionResponse(UUID uuid) {
-        return ChatClientCommand.START.getCommandName() + uuid.toString();
+        return ChatClientCommand.START.getCommandName() + " " + uuid.toString();
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ChatServiceImpl implements ChatService {
         String message = chatClientMessage.getClientMessage();
         if (message.length() > 0) {
             if (message.indexOf(ChatClientCommand.START.getCommandName()) == 0) {
-                clientName = message.substring(ChatClientCommand.START.getCommandName().length());
+                clientName = message.substring(ChatClientCommand.START.getCommandName().length()).trim();
                 return  ChatServerResponse.builder()
                         .clientName(clientName)
                         .serverResponse(ChatServerCommand.START.getCommandName() + clientName)

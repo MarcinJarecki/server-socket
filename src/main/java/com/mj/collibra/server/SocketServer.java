@@ -62,8 +62,7 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             // noinspection InfiniteLoopStatement
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                long chatStartTime = Instant.now().toEpochMilli();
-                Runnable worker = new MessageHandler(clientSocket, chatStartTime, commandResponseService, chatService, sessionService);
+                Runnable worker = new MessageHandler(clientSocket, commandResponseService, chatService, sessionService);
                 executor.execute(worker);
             }
         } catch (UnknownHostException e) {

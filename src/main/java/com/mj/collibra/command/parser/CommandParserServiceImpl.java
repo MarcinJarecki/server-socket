@@ -30,7 +30,7 @@ public class CommandParserServiceImpl implements CommandParserService {
                 return CommandData.builder()
                         .typeOfCommand(TypeOfCommand.CHAT)
                         .command(chatClientCommand)
-                        .arguments(new String[0])
+                        .arguments(getCommandParameters(chatClientCommand, message))
                         .build();
             }
             // TODO Regex
@@ -57,14 +57,17 @@ public class CommandParserServiceImpl implements CommandParserService {
 
     private String[] getCommandParameters(Command command, String message) {
         int countOfSpaceAfterCommand = 1;
-        String parameters = message.substring(command.getLength() + countOfSpaceAfterCommand);
-        String[] result = parameters.split(" ");
-        int pos = 0;
-        for(String res: result){
-            result[pos] = res.trim();
-            pos++;
+        if (message.length() > (command.getLength() +1) ) {
+            String parameters = message.substring(command.getLength() + countOfSpaceAfterCommand);
+            String[] result = parameters.split(" ");
+            int pos = 0;
+            for (String res : result) {
+                result[pos] = res.trim();
+                pos++;
+            }
+            return result;
         }
-        return result;
+        return null;
     }
 
 }

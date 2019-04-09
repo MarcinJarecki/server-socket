@@ -23,6 +23,10 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public boolean removeSession(UUID uuid) {
+        Session session = sessionsStorage.get(uuid);
+        if(session != null) {
+            sessionsStorage.remove(uuid);
+        }
         return false;
     }
 
@@ -43,6 +47,9 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public String getClientName(UUID uuid) {
+        if(getSession(uuid) == null) {
+            return "";
+        }
         return getSession(uuid).getClientName();
     }
 

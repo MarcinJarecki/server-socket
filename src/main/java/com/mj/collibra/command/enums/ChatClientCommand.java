@@ -7,7 +7,7 @@ public enum ChatClientCommand implements Command {
     /**
      * First chars at client message related with chat
      */
-    START("HI, I'M "),
+    START("HI, I'M"),
     END("BYE MATE!");
 
     private String command;

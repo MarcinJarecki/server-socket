@@ -103,7 +103,7 @@ public class CommandResponseServiceImpl implements CommandResponseService{
                 nodeY = arguments[1];
                 response = directGraphService.removeEdge(nodeX, nodeY);
                 break;
-            case SHORTES_PATH:
+            case SHORTEST_PATH:
                 nodeX = arguments[0];
                 nodeY = arguments[1];
                 response = directGraphService.shortestPath(nodeX, nodeY);

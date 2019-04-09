@@ -242,41 +242,33 @@ public class DirectGraphServiceImplTest {
         assertEquals(expectedResponse, response);
     }
 
-    /// TODO
     @Test
     public void shouldReturnCloserThanCase1() {
         String sourceNode = nodeNames[0];
         String weight = "5";
-        HashSet<String> expectedResponse = new HashSet<>(2);
-        expectedResponse.add(nodeNames[1]);
-        expectedResponse.add(nodeNames[2]);
+        String expectedResponse = nodeNames[1] + "," + nodeNames[2];
 
         String response = directGraphService.closerThan(weight, sourceNode);
 
-        assertEquals(expectedResponse.toString(), response);
+        assertEquals(expectedResponse, response);
     }
 
     @Test
     public void shouldReturnCloserThanCase2() {
         String sourceNode = nodeNames[4];
         String weight = "10";
-        HashSet<String> expectedResponse = new HashSet<>(2);
-        expectedResponse.add(nodeNames[0]);
-        expectedResponse.add(nodeNames[1]);
-        expectedResponse.add(nodeNames[2]);
-        expectedResponse.add(nodeNames[3]);
-        expectedResponse.add(nodeNames[5]);
+        String expectedResponse = nodeNames[0] + "," + nodeNames[1] + "," + nodeNames[2] + "," + nodeNames[3] + "," + nodeNames[5];
 
         String response = directGraphService.closerThan(weight, sourceNode);
 
-        assertEquals(expectedResponse.toString(), response);
+        assertEquals(expectedResponse, response);
     }
 
     @Test
     public void shouldReturnCloserThanCase3() {
         String sourceNode = nodeNames[5];
         String weight = "1";
-        String expectedResponse = "[]";
+        String expectedResponse = "";
 
         String response = directGraphService.closerThan(weight, sourceNode);
 
@@ -298,7 +290,7 @@ public class DirectGraphServiceImplTest {
     public void shouldNotReturnCloserThanWhenWeightlessThanZero() {
         String sourceNode = nodeNames[1];
         String weight = "-1";
-        String expectedResponse = GraphServerCommand.NODE_NOT_FOUND.getCommandName();
+        String expectedResponse = "";
 
         String response = directGraphService.closerThan(weight, sourceNode);
 
