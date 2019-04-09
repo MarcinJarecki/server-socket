@@ -4,6 +4,7 @@ import com.mj.collibra.chat.ChatService;
 import com.mj.collibra.command.enums.CommonServerCommand;
 import com.mj.collibra.command.enums.GraphClientCommand;
 import com.mj.collibra.command.parser.CommandParserService;
+import com.mj.collibra.common.SessionService;
 import com.mj.collibra.graph.DirectGraphService;
 import com.mj.collibra.model.ChatClientMessage;
 import com.mj.collibra.model.ChatServerResponse;
@@ -11,6 +12,8 @@ import com.mj.collibra.model.CommandData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * @author Marcin Jarecki
@@ -22,29 +25,25 @@ public class CommandResponseServiceImpl implements CommandResponseService{
     private final DirectGraphService directGraphService;
     private final CommandParserService commandParserService;
     private final ChatService chatService;
-
-    private String clientName;
+    private final SessionService sessionService;
 
     @Autowired
-    CommandResponseServiceImpl(ChatService chatService, CommandParserService commandParserService, DirectGraphService directGraphService) {
+    CommandResponseServiceImpl(ChatService chatService, CommandParserService commandParserService,
+                               DirectGraphService directGraphService, SessionService sessionService) {
         this.chatService = chatService;
         this.commandParserService = commandParserService;
         this.directGraphService = directGraphService;
+        this.sessionService = sessionService;
     }
 
     @Override
-    public String getClientName() {
-        return clientName;
-    }
-
-    @Override
-    public String createResponseToClient(String message, long chatStartTime) {
+    public String createResponseToClient(UUID uuid, String message, long chatStartTime) {
         String responseToClient = getUndefinedCommandResponse();
         if (message.length() > 0) {
             CommandData commandData = commandParserService.createCommand(message);
             switch (commandData.getTypeOfCommand()) {
                 case CHAT:
-                    responseToClient = handleWithChatMessage(message, chatStartTime);
+                    responseToClient = handleWithChatMessage(uuid, message, chatStartTime);
                     break;
                 case GRAPH:
                     responseToClient = handleWithGraphCommand(commandData);
@@ -60,16 +59,16 @@ public class CommandResponseServiceImpl implements CommandResponseService{
             return responseToClient;
         }
 
-    private String handleWithChatMessage(String message, long chatStartTime) {
+    private String handleWithChatMessage(UUID uuid, String message, long chatStartTime) {
         ChatClientMessage chatClientMessage = ChatClientMessage.builder()
-                .clientName(clientName)
+                .clientName(sessionService.getClientName(uuid))
                 .charStartTime(chatStartTime)
                 .clientMessage(message)
                 .build();
         ChatServerResponse response = chatService.createResponseToClient(chatClientMessage);
         if (response.getClientName() != null) {
-            clientName = response.getClientName();
-            log.debug("clientName: {}", clientName);
+            sessionService.setSessionClientName(uuid, response.getClientName());
+            log.debug("clientName: {}", sessionService.getClientName(uuid));
         }
         return response.getServerResponse();
     }
@@ -115,7 +114,7 @@ public class CommandResponseServiceImpl implements CommandResponseService{
                 response = directGraphService.closerThan(nodeX, edgeWeight);
                 break;
             default:
-                response = getUndefinedCommandResponse();;
+                response = getUndefinedCommandResponse();
                 break;
         }
         return response;

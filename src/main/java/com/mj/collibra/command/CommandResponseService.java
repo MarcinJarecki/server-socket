@@ -1,22 +1,19 @@
 package com.mj.collibra.command;
 
+import java.util.UUID;
+
 /**
  * @author Marcin Jarecki
  */
 public interface CommandResponseService {
-    /**
-     * Return conneted client name
-     *
-     * @return Connected client name
-     */
-    String getClientName();
 
     /**
      * Create response to connected client
      *
+     * @param uuid - session unique id
      * @param message - message from client
      * @param chatStartTime - chat start time
      * @return response to client
      */
-    String createResponseToClient(String message, long chatStartTime);
+    String createResponseToClient(UUID uuid, String message, long chatStartTime);
 }

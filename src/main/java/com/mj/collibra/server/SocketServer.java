@@ -3,6 +3,7 @@ package com.mj.collibra.server;
 import com.mj.collibra.command.CommandResponseService;
 import com.mj.collibra.chat.ChatService;
 import com.mj.collibra.common.ConfigurationService;
+import com.mj.collibra.common.SessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,6 +28,7 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
     private final CommandResponseService commandResponseService;
     private final ChatService chatService;
     private final ConfigurationService configurationService;
+    private final SessionService sessionService;
 
     private ExecutorService executor = null;
 
@@ -34,10 +36,12 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
     @Autowired
     public SocketServer(@Qualifier("ChatService") ChatService chatService,
                         CommandResponseService commandResponseService,
-                        ConfigurationService configurationService) {
+                        ConfigurationService configurationService,
+                        SessionService sessionService) {
         this.chatService = chatService;
         this.commandResponseService = commandResponseService;
         this.configurationService = configurationService;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -57,7 +61,7 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             // noinspection InfiniteLoopStatement
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                Runnable worker = new MessageHandler(clientSocket, commandResponseService, chatService);
+                Runnable worker = new MessageHandler(clientSocket, commandResponseService, chatService, sessionService);
                 executor.execute(worker);
             }
         } catch (UnknownHostException e) {

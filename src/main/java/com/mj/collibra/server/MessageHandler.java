@@ -2,6 +2,8 @@ package com.mj.collibra.server;
 
 import com.mj.collibra.command.CommandResponseService;
 import com.mj.collibra.chat.ChatService;
+import com.mj.collibra.common.SessionService;
+import com.mj.collibra.model.Session;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -24,6 +26,7 @@ public class MessageHandler implements Runnable {
     private final Socket clientSocket;
     private final CommandResponseService commandResponseService;
     private final ChatService chatService;
+    private final SessionService sessionService;
 
     private long chatStartTime;
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
@@ -31,10 +34,11 @@ public class MessageHandler implements Runnable {
 
     private static final String SERVER_SAY_LOG = "Server say: {}";
 
-    MessageHandler(Socket clientSocket, CommandResponseService commandResponseService, ChatService chatService) {
+    MessageHandler(Socket clientSocket, CommandResponseService commandResponseService, ChatService chatService, SessionService sessionService) {
         this.clientSocket = clientSocket;
         this.commandResponseService = commandResponseService;
         this.chatService = chatService;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -43,8 +47,10 @@ public class MessageHandler implements Runnable {
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
         ) {
-            UUID uuid = UUID.randomUUID();
+            UUID uuid = sessionService.generateUuid();
             String initMessage = chatService.startSessionResponse(uuid);
+            Session session = new Session();
+            session.setUuid(uuid);
             log.debug(SERVER_SAY_LOG, initMessage);
             out.println(initMessage);
 
@@ -53,6 +59,10 @@ public class MessageHandler implements Runnable {
             while ((message = in.readLine()) != null) {
                 if (!startChat) {
                     chatStartTime = Instant.now().toEpochMilli();
+                    session.setSessionStartTime(chatStartTime);
+                    if (!sessionService.setSession(uuid, session)) {
+                        log.warn("Duplicated client session uuid: {}", uuid);
+                    }
                     startChat = true;
                 }
 
@@ -61,15 +71,15 @@ public class MessageHandler implements Runnable {
                 }
 
                 Runnable timeoutTask = () -> {
-                    String response = chatService.endSessionResponse(commandResponseService.getClientName(), chatStartTime);
-                    log.debug("Timeout with " + commandResponseService.getClientName() + SERVER_SAY_LOG, response);
+                    String response = chatService.endSessionResponse(sessionService.getClientName(uuid), chatStartTime);
+                    log.debug("Timeout with " + sessionService.getClientName(uuid) + SERVER_SAY_LOG, response);
                     out.println(response);
                 };
                 scheduledFuture = scheduledExecutorService.schedule(timeoutTask, 30, TimeUnit.SECONDS);
 
-                log.debug("{} - Client say: {}", commandResponseService.getClientName(), message);
-                String response = commandResponseService.createResponseToClient(message, chatStartTime);
-                log.debug(commandResponseService.getClientName() + ": " + SERVER_SAY_LOG, response);
+                log.debug("{} - Client say: {}", sessionService.getClientName(uuid), message);
+                String response = commandResponseService.createResponseToClient(uuid, message, chatStartTime);
+                log.debug(sessionService.getClientName(uuid) + ": " + SERVER_SAY_LOG, response);
                 out.println(response);
             }
 
