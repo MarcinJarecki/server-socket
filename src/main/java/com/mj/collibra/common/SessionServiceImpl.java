@@ -23,7 +23,7 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void removeSession(UUID uuid) {
-        Session session = sessionsStorage.get(uuid);
+        Session session = getSession(uuid);
         if (session != null) {
             sessionsStorage.remove(uuid);
         }

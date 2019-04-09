@@ -7,8 +7,7 @@ import com.mj.collibra.common.SessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 
@@ -23,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class SocketServer implements ApplicationListener<ApplicationReadyEvent> {
+public class SocketServer implements CommandLineRunner {
 
     private final CommandResponseService commandResponseService;
     private final ChatService chatService;
@@ -45,7 +44,7 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
     }
 
     @Override
-    public void onApplicationEvent(final ApplicationReadyEvent event) {
+    public void run(String... args) {
         try (ServerSocket serverSocket = new ServerSocket()) {
             InetAddress inetAddress = InetAddress.getByName(configurationService.getHostName());
             InetSocketAddress inetSocketAddress = new InetSocketAddress(inetAddress, configurationService.getPort());
@@ -84,4 +83,6 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
 
 
     }
+
+
 }
