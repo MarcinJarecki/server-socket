@@ -7,6 +7,8 @@ import com.mj.collibra.command.enums.TypeOfCommand;
 import com.mj.collibra.model.CommandData;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -17,6 +19,13 @@ import java.util.stream.Stream;
 @Service
 public class CommandParserServiceImpl implements CommandParserService {
 
+    private static final ConcurrentHashMap<String, Pattern> COMMAND_PATTERNS = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    public void init(){
+        Stream.of(ChatClientCommand.values()).forEach(command -> COMMAND_PATTERNS.put(command.getCommandName(), Pattern.compile(command.getCommandName())));
+        Stream.of(GraphClientCommand.values()).forEach(command -> COMMAND_PATTERNS.put(command.getCommandName(), Pattern.compile(command.getCommandName())));
+    }
 
     @Override
     public CommandData createCommand(String message) {
@@ -58,8 +67,8 @@ public class CommandParserServiceImpl implements CommandParserService {
     }
 
     private boolean extractCommandFromMessage(String command, String message) {
-        Pattern word = Pattern.compile(command);
-        Matcher match = word.matcher(message);
+        Pattern pattern = COMMAND_PATTERNS.get(command);
+        Matcher match = pattern.matcher(message);
         return match.find();
     }
 

@@ -1,4 +1,4 @@
-# Collibra socket server
+# Socket server
 
 # server and log configuration
 /resources/application.properties
