@@ -17,6 +17,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Value("${server.connection.timeout}")
     private int connectionTimeout;
 
+    @Value("${executor.pool.size}")
+    private int executorPoolSize;
+
     @Override
     public int getPort() {
         return this.port;
@@ -32,4 +35,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         return this.connectionTimeout;
     }
 
+    @Override
+    public int getExecutorPoolSize() {
+        return executorPoolSize;
+    }
 }

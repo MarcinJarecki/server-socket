@@ -22,12 +22,11 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public boolean removeSession(UUID uuid) {
+    public void removeSession(UUID uuid) {
         Session session = sessionsStorage.get(uuid);
         if (session != null) {
             sessionsStorage.remove(uuid);
         }
-        return false;
     }
 
     @Override
@@ -54,14 +53,11 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public boolean setSessionClientName(UUID uuid, String clientName) {
+    public void setSessionClientName(UUID uuid, String clientName) {
         Session session = getSession(uuid);
-        if (session == null) {
-            return false;
-        } else {
+        if (session != null) {
             session.setClientName(clientName);
         }
-        return true;
     }
 
 }

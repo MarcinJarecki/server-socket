@@ -26,6 +26,7 @@ public class MessageHandler implements Runnable {
     private final CommandResponseService commandResponseService;
     private final ChatService chatService;
     private final SessionService sessionService;
+    private final int connectionTimeout;
 
     private long chatStartTime;
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
@@ -33,11 +34,13 @@ public class MessageHandler implements Runnable {
 
     private static final String SERVER_SAY_LOG = "Server say: {}";
 
-    MessageHandler(Socket clientSocket, CommandResponseService commandResponseService, ChatService chatService, SessionService sessionService) {
+    MessageHandler(Socket clientSocket, CommandResponseService commandResponseService, ChatService chatService,
+                   SessionService sessionService, int connectionTimeout) {
         this.clientSocket = clientSocket;
         this.commandResponseService = commandResponseService;
         this.chatService = chatService;
         this.sessionService = sessionService;
+        this.connectionTimeout = connectionTimeout;
         initSession();
     }
 
@@ -57,7 +60,7 @@ public class MessageHandler implements Runnable {
                 log.debug("Timeout with " + sessionService.getClientName(uuid) + SERVER_SAY_LOG, response);
                 out.println(response);
             };
-            scheduledExecutorService.schedule(timeoutTask, 30, TimeUnit.SECONDS);
+            scheduledExecutorService.schedule(timeoutTask, connectionTimeout, TimeUnit.SECONDS);
 
             String message;
             while ((message = in.readLine()) != null) {

@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * @author Marcin Jarecki
+ */
 @Value
 @NoArgsConstructor
 public class Graph {

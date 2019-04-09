@@ -1,14 +1,15 @@
 package com.mj.collibra.chat;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.util.UUID;
 import com.mj.collibra.command.enums.ChatClientCommand;
 import com.mj.collibra.command.enums.ChatServerCommand;
 import com.mj.collibra.command.enums.CommonServerCommand;
-import com.mj.collibra.model.*;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import com.mj.collibra.model.ChatClientMessage;
+import com.mj.collibra.model.ChatServerResponse;
 
-import java.time.Instant;
-import java.util.UUID;
 
 /**
  * @author Marcin Jarecki

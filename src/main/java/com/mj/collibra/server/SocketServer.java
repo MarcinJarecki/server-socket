@@ -54,14 +54,14 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             log.info("-- SERVER START on: {} port: {}", inetSocketAddress.getAddress(), inetSocketAddress.getPort());
             log.info("--------------------------------------------------------------------");
 
+            executor = Executors.newFixedThreadPool(configurationService.getExecutorPoolSize());
 
-            // TODO to pool
-            executor = Executors.newFixedThreadPool(10);
+            int connectionTimeout = configurationService.getConnectionTimeout();
 
             // noinspection InfiniteLoopStatement
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                Runnable worker = new MessageHandler(clientSocket, commandResponseService, chatService, sessionService);
+                Runnable worker = new MessageHandler(clientSocket, commandResponseService, chatService, sessionService, connectionTimeout);
                 executor.execute(worker);
             }
         } catch (UnknownHostException e) {

@@ -24,4 +24,11 @@ public interface ConfigurationService {
      * @return server connection timeout
      */
     int getConnectionTimeout();
+
+    /**
+     * Return ize of executor pool
+     *
+     * @return size of pool
+     */
+    int getExecutorPoolSize();
 }

@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.UUID;
 
+/**
+ * @author Marcin Jarecki
+ */
 @Data
 public class Session {
     private UUID uuid;
