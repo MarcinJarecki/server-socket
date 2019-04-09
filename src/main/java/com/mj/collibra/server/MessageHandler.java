@@ -22,7 +22,6 @@ import java.util.concurrent.*;
 @Slf4j
 public class MessageHandler implements Runnable {
 
-
     private final Socket clientSocket;
     private final CommandResponseService commandResponseService;
     private final ChatService chatService;
@@ -31,7 +30,6 @@ public class MessageHandler implements Runnable {
     private long chatStartTime;
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     private UUID uuid;
-    private Session session;
 
     private static final String SERVER_SAY_LOG = "Server say: {}";
 
@@ -108,7 +106,7 @@ public class MessageHandler implements Runnable {
     private void initSession() {
         chatStartTime = Instant.now().toEpochMilli();
         uuid = sessionService.generateUuid();
-        session = new Session();
+        Session session = new Session();
         session.setUuid(uuid);
         session.setSessionStartTime(chatStartTime);
         if (!sessionService.setSession(uuid, session)) {
