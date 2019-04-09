@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.*;
+import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +62,8 @@ public class SocketServer implements ApplicationListener<ApplicationReadyEvent> 
             // noinspection InfiniteLoopStatement
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                Runnable worker = new MessageHandler(clientSocket, commandResponseService, chatService, sessionService);
+                long chatStartTime = Instant.now().toEpochMilli();
+                Runnable worker = new MessageHandler(clientSocket, chatStartTime, commandResponseService, chatService, sessionService);
                 executor.execute(worker);
             }
         } catch (UnknownHostException e) {

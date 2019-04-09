@@ -31,14 +31,16 @@ public class MessageHandler implements Runnable {
     private long chatStartTime;
     private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> scheduledFuture = null;
+    private UUID uuid;
 
     private static final String SERVER_SAY_LOG = "Server say: {}";
 
-    MessageHandler(Socket clientSocket, CommandResponseService commandResponseService, ChatService chatService, SessionService sessionService) {
+    MessageHandler(Socket clientSocket, long chatStartTime, CommandResponseService commandResponseService, ChatService chatService, SessionService sessionService) {
         this.clientSocket = clientSocket;
         this.commandResponseService = commandResponseService;
         this.chatService = chatService;
         this.sessionService = sessionService;
+        this.chatStartTime = chatStartTime;
     }
 
     @Override
@@ -47,42 +49,34 @@ public class MessageHandler implements Runnable {
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
         ) {
-            UUID uuid = sessionService.generateUuid();
+            uuid = sessionService.generateUuid();
             String initMessage = chatService.startSessionResponse(uuid);
             Session session = new Session();
             session.setUuid(uuid);
+            session.setSessionStartTime(chatStartTime);
             log.debug(SERVER_SAY_LOG, initMessage);
             out.println(initMessage);
 
+//            chatStartTime = Instant.now().toEpochMilli();
+
+            if (!sessionService.setSession(uuid, session)) {
+                log.warn("Duplicated client session uuid: {}", uuid);
+            }
+
+            Runnable timeoutTask = () -> {
+                String response = chatService.endSessionResponse(sessionService.getClientName(uuid), chatStartTime);
+                log.debug("Timeout with " + sessionService.getClientName(uuid) + SERVER_SAY_LOG, response);
+                out.println(response);
+            };
+            scheduledFuture = scheduledExecutorService.schedule(timeoutTask, 30, TimeUnit.SECONDS);
+
             String message;
-            boolean startChat = false;
             while ((message = in.readLine()) != null) {
-                if (!startChat) {
-                    chatStartTime = Instant.now().toEpochMilli();
-                    session.setSessionStartTime(chatStartTime);
-                    if (!sessionService.setSession(uuid, session)) {
-                        log.warn("Duplicated client session uuid: {}", uuid);
-                    }
-                    startChat = true;
-                }
-
-                if (scheduledFuture != null) {
-                    scheduledFuture.cancel(true);
-                }
-
-                Runnable timeoutTask = () -> {
-                    String response = chatService.endSessionResponse(sessionService.getClientName(uuid), chatStartTime);
-                    log.debug("Timeout with " + sessionService.getClientName(uuid) + SERVER_SAY_LOG, response);
-                    out.println(response);
-                };
-                scheduledFuture = scheduledExecutorService.schedule(timeoutTask, 30, TimeUnit.SECONDS);
-
                 log.debug("{} - Client say: {}", sessionService.getClientName(uuid), message);
                 String response = commandResponseService.createResponseToClient(uuid, message, chatStartTime);
                 log.debug(sessionService.getClientName(uuid) + ": " + SERVER_SAY_LOG, response);
                 out.println(response);
             }
-
         } catch (SocketTimeoutException exception) {
             log.debug(SERVER_SAY_LOG, "Connection Timeout Exception");
             stop();
@@ -99,6 +93,7 @@ public class MessageHandler implements Runnable {
     }
 
     private void stop() {
+        sessionService.removeSession(uuid);
         try {
             scheduledExecutorService.shutdown();
             scheduledExecutorService.awaitTermination(5, TimeUnit.SECONDS);
