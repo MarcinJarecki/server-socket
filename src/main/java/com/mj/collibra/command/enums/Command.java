@@ -12,7 +12,7 @@ public interface Command {
     String getCommandName();
 
     /**
-     *  length of command
+     * length of command
      *
      * @return length of command
      */

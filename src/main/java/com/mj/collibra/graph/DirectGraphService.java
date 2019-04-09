@@ -14,6 +14,7 @@ public interface DirectGraphService {
      * @return response to client
      */
     String addNode(String name);
+
     /**
      * Remove node from graph
      *
@@ -23,10 +24,10 @@ public interface DirectGraphService {
     String removeNode(String name);
 
     /**
-     *  Add edge to graph
+     * Add edge to graph
      *
-     * @param nodeXName - graph node name
-     * @param nodeYName - graph node name
+     * @param nodeXName  - graph node name
+     * @param nodeYName  - graph node name
      * @param weightEdge - edge weight
      * @return response to client
      */
@@ -53,7 +54,7 @@ public interface DirectGraphService {
     /**
      * Return list of node closer to nodeName that the given weight
      *
-     * @param weight - max sum of weight
+     * @param weight   - max sum of weight
      * @param nodeName - start node name
      * @return response to client
      */

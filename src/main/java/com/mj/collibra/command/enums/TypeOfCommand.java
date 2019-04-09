@@ -5,7 +5,7 @@ package com.mj.collibra.command.enums;
  */
 public enum TypeOfCommand {
     /**
-     *  Type of client command
+     * Type of client command
      */
     CHAT,
     GRAPH,

@@ -17,16 +17,18 @@ public enum GraphServerCommand implements Command {
     private String command;
     private int length;
 
-    GraphServerCommand(String command){
+    GraphServerCommand(String command) {
         this.command = command;
         this.length = command.length();
     }
 
     @Override
-    public String getCommandName(){
+    public String getCommandName() {
         return this.command;
     }
 
     @Override
-    public int getLength() { return this.length;}
+    public int getLength() {
+        return this.length;
+    }
 }

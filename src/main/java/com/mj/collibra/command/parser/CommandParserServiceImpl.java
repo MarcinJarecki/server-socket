@@ -22,7 +22,6 @@ public class CommandParserServiceImpl implements CommandParserService {
     public CommandData createCommand(String message) {
 
         if (message != null && message.length() > 0) {
-            // TODO Regex
 
             Command chatClientCommand = Stream.of(ChatClientCommand.values())
                     .filter(comm -> extractCommandFromMessage(comm.getCommandName(), message))
@@ -36,7 +35,7 @@ public class CommandParserServiceImpl implements CommandParserService {
                         .arguments(getCommandParameters(chatClientCommand, message))
                         .build();
             }
-            // TODO Regex
+
             Command graphClientCommand = Stream.of(GraphClientCommand.values())
                     .filter(comm -> extractCommandFromMessage(comm.getCommandName(), message))
                     .findFirst()
@@ -58,7 +57,7 @@ public class CommandParserServiceImpl implements CommandParserService {
                 .build();
     }
 
-    private boolean extractCommandFromMessage(String command, String message){
+    private boolean extractCommandFromMessage(String command, String message) {
         Pattern word = Pattern.compile(command);
         Matcher match = word.matcher(message);
         return match.find();
@@ -66,7 +65,7 @@ public class CommandParserServiceImpl implements CommandParserService {
 
     private String[] getCommandParameters(Command command, String message) {
         int countOfSpaceAfterCommand = 1;
-        if (message.length() > (command.getLength() +1) ) {
+        if (message.length() > (command.getLength() + 1)) {
             String parameters = message.substring(command.getLength() + countOfSpaceAfterCommand);
             String[] result = parameters.split(" ");
             int pos = 0;

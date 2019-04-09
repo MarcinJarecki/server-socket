@@ -6,6 +6,7 @@ import com.mj.collibra.command.enums.CommonServerCommand;
 import com.mj.collibra.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class ChatServiceImpl implements ChatService {
         if (message.length() > 0) {
             if (message.indexOf(ChatClientCommand.START.getCommandName()) == 0) {
                 clientName = message.substring(ChatClientCommand.START.getCommandName().length()).trim();
-                return  ChatServerResponse.builder()
+                return ChatServerResponse.builder()
                         .clientName(clientName)
                         .serverResponse(ChatServerCommand.START.getCommandName() + clientName)
                         .build();
@@ -47,10 +48,12 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public String endSessionResponse(String clientName, long chatStartTime) {
-        if (clientName == null) {clientName = "";}
+        if (clientName == null) {
+            clientName = "";
+        }
         long chatDuration = Instant.now().toEpochMilli() - chatStartTime;
 
-        return new StringBuffer ()
+        return new StringBuffer()
                 .append(ChatServerCommand.END_PART_1.getCommandName())
                 .append(clientName)
                 .append(ChatServerCommand.END_PART_2.getCommandName())

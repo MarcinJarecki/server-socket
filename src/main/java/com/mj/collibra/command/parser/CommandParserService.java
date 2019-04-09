@@ -1,7 +1,5 @@
 package com.mj.collibra.command.parser;
 
-import com.mj.collibra.command.enums.GraphClientCommand;
-import com.mj.collibra.command.enums.TypeOfCommand;
 import com.mj.collibra.model.CommandData;
 
 /**

@@ -1,6 +1,7 @@
 package com.mj.collibra.common;
 
 import com.mj.collibra.model.Session;
+
 import java.util.UUID;
 
 /**

@@ -30,7 +30,7 @@ public interface ChatService {
     /**
      * Create end server chat response
      *
-     * @param clientName - client name
+     * @param clientName    - client name
      * @param chatStartTime - star chat time
      * @return - end chat session server response
      */

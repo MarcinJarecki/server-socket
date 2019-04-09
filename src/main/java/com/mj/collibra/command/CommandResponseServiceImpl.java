@@ -20,7 +20,7 @@ import java.util.UUID;
  */
 @Service
 @Slf4j
-public class CommandResponseServiceImpl implements CommandResponseService{
+public class CommandResponseServiceImpl implements CommandResponseService {
 
     private final DirectGraphService directGraphService;
     private final CommandParserService commandParserService;
@@ -56,8 +56,8 @@ public class CommandResponseServiceImpl implements CommandResponseService{
                     break;
             }
         }
-            return responseToClient;
-        }
+        return responseToClient;
+    }
 
     private String handleWithChatMessage(UUID uuid, String message, long chatStartTime) {
         ChatClientMessage chatClientMessage = ChatClientMessage.builder()

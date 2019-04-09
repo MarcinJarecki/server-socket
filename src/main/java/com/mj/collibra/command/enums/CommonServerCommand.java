@@ -12,7 +12,7 @@ public enum CommonServerCommand implements Command {
     private String command;
     private int length;
 
-    CommonServerCommand(String command){
+    CommonServerCommand(String command) {
         this.command = command;
         this.length = command.length();
     }
@@ -23,6 +23,8 @@ public enum CommonServerCommand implements Command {
     }
 
     @Override
-    public int getLength() { return this.length;}
+    public int getLength() {
+        return this.length;
+    }
 
 }

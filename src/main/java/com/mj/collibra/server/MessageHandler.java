@@ -52,7 +52,6 @@ public class MessageHandler implements Runnable {
             out.println(initMessage);
 
 
-
             Runnable timeoutTask = () -> {
                 String response = chatService.endSessionResponse(sessionService.getClientName(uuid), chatStartTime);
                 log.debug("Timeout with " + sessionService.getClientName(uuid) + SERVER_SAY_LOG, response);

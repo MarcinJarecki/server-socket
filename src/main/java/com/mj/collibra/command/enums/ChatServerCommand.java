@@ -15,7 +15,7 @@ public enum ChatServerCommand implements Command {
     private String command;
     private int length;
 
-    ChatServerCommand(String command){
+    ChatServerCommand(String command) {
         this.command = command;
         this.length = command.length();
     }
@@ -26,6 +26,8 @@ public enum ChatServerCommand implements Command {
     }
 
     @Override
-    public int getLength() { return this.length;}
+    public int getLength() {
+        return this.length;
+    }
 
 }

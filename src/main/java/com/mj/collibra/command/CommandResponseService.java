@@ -10,8 +10,8 @@ public interface CommandResponseService {
     /**
      * Create response to connected client
      *
-     * @param uuid - session unique id
-     * @param message - message from client
+     * @param uuid          - session unique id
+     * @param message       - message from client
      * @param chatStartTime - chat start time
      * @return response to client
      */

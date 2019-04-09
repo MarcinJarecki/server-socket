@@ -47,7 +47,7 @@ public class ShortestPathsFromSource {
     }
 
     private void calculateMinimumDistance(GraphNode evaluationNode, Integer edgeWeigh, GraphNode sourceNode, Map<GraphNode, Integer> distance) {
-        Integer sourceDistance =  distance.get(sourceNode);
+        Integer sourceDistance = distance.get(sourceNode);
         if (sourceDistance + edgeWeigh < distance.get(evaluationNode)) {
             distance.put(evaluationNode, sourceDistance + edgeWeigh);
         }
