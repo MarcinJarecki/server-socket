@@ -80,7 +80,7 @@ public class CommandParserServiceImplTest {
 
         assertEquals(TypeOfCommand.CHAT, result.getTypeOfCommand());
         assertEquals(ChatClientCommand.END, result.getCommand());
-        assertNull(result.getArguments());
+        assertArrayEquals(new String[0], result.getArguments());
     }
 
     @Test

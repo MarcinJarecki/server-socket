@@ -7,6 +7,8 @@ import com.mj.collibra.command.enums.TypeOfCommand;
 import com.mj.collibra.model.CommandData;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -21,8 +23,9 @@ public class CommandParserServiceImpl implements CommandParserService {
 
         if (message != null && message.length() > 0) {
             // TODO Regex
+
             Command chatClientCommand = Stream.of(ChatClientCommand.values())
-                    .filter(comm -> message.contains(comm.getCommandName()))
+                    .filter(comm -> extractCommandFromMessage(comm.getCommandName(), message))
                     .findFirst()
                     .orElse(null);
 
@@ -35,7 +38,7 @@ public class CommandParserServiceImpl implements CommandParserService {
             }
             // TODO Regex
             Command graphClientCommand = Stream.of(GraphClientCommand.values())
-                    .filter(comm -> message.contains(comm.getCommandName()))
+                    .filter(comm -> extractCommandFromMessage(comm.getCommandName(), message))
                     .findFirst()
                     .orElse(null);
 
@@ -55,6 +58,12 @@ public class CommandParserServiceImpl implements CommandParserService {
                 .build();
     }
 
+    private boolean extractCommandFromMessage(String command, String message){
+        Pattern word = Pattern.compile(command);
+        Matcher match = word.matcher(message);
+        return match.find();
+    }
+
     private String[] getCommandParameters(Command command, String message) {
         int countOfSpaceAfterCommand = 1;
         if (message.length() > (command.getLength() +1) ) {
@@ -67,7 +76,7 @@ public class CommandParserServiceImpl implements CommandParserService {
             }
             return result;
         }
-        return null;
+        return new String[0];
     }
 
 }
