@@ -3,7 +3,11 @@
 # server and log configuration
 /resources/application.properties
 
-# Build:
+
+# Unit test:
+mvn test
+
+# Create jar file:
 mvn package
 
 # Run server:
