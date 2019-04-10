@@ -1,17 +1,25 @@
 # Socket server
 
-# server and log configuration
+## Configuration file
+```bash
 /resources/application.properties
+```
 
-
-# Unit test:
+## Run unit test:
+```bash
 mvn test
+```
 
-# Create jar file:
+## Create jar file:
+```bash
 mvn package
+```
 
-# Run server:
+## Run server:
+```bash
 java -jar collibra-1.0.0.jar
+```
+## Authors
 
-
-
+**Marcin Jarecki**
+<m.jarecki78@gmail.com>
