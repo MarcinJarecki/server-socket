@@ -36,6 +36,7 @@ public class CommandParserServiceImplTest {
     public void setUp() {
 
         commandParserService = new CommandParserServiceImpl();
+        ((CommandParserServiceImpl) commandParserService).init();
 
         commandHiArg = "90617332-14ed-4209-a9a6-8176806c0247";
         commandHi = "HI, I'M " + commandHiArg;

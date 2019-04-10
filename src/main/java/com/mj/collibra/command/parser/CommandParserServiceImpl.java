@@ -22,7 +22,7 @@ public class CommandParserServiceImpl implements CommandParserService {
     private static final ConcurrentHashMap<String, Pattern> COMMAND_PATTERNS = new ConcurrentHashMap<>();
 
     @PostConstruct
-    public void init(){
+    public void init() {
         Stream.of(ChatClientCommand.values()).forEach(command -> COMMAND_PATTERNS.put(command.getCommandName(), Pattern.compile(command.getCommandName())));
         Stream.of(GraphClientCommand.values()).forEach(command -> COMMAND_PATTERNS.put(command.getCommandName(), Pattern.compile(command.getCommandName())));
     }
@@ -68,8 +68,11 @@ public class CommandParserServiceImpl implements CommandParserService {
 
     private boolean extractCommandFromMessage(String command, String message) {
         Pattern pattern = COMMAND_PATTERNS.get(command);
-        Matcher match = pattern.matcher(message);
-        return match.find();
+        if (pattern != null) {
+            Matcher match = pattern.matcher(message);
+            return match.find();
+        }
+        return false;
     }
 
     private String[] getCommandParameters(Command command, String message) {
