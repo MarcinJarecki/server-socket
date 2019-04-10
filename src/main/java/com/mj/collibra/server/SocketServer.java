@@ -33,7 +33,7 @@ public class SocketServer implements CommandLineRunner {
 
 
     @Autowired
-    public SocketServer(@Qualifier("ChatService") ChatService chatService,
+    public SocketServer(ChatService chatService,
                         CommandResponseService commandResponseService,
                         ConfigurationService configurationService,
                         SessionService sessionService) {

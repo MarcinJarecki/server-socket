@@ -14,7 +14,7 @@ import com.mj.collibra.model.ChatServerResponse;
 /**
  * @author Marcin Jarecki
  */
-@Service("ChatService")
+@Service()
 @Slf4j
 public class ChatServiceImpl implements ChatService {
 

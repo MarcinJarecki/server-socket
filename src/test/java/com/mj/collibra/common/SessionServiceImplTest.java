@@ -50,6 +50,23 @@ public class SessionServiceImplTest {
     }
 
     @Test
+    public void setSessionTwice() {
+        boolean result = sessionService.setSession(uuid, session);
+
+        UUID uuidSecond = UUID.randomUUID();
+        Session sessionSecond = new Session();
+        sessionSecond.setUuid(uuidSecond);
+        sessionSecond.setSessionStartTime(0);
+        sessionSecond.setClientName("client name 2");
+        boolean resultSecond = sessionService.setSession(uuidSecond, session);
+
+        assertTrue(result);
+        assertTrue(resultSecond);
+    }
+
+
+
+    @Test
     public void setSessionWithoutExistedUiid() {
         sessionService.setSession(uuid, session);
 
