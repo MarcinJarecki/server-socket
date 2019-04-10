@@ -62,7 +62,7 @@ public class CommandParserServiceImplTest {
         commandCloserThatArg = new String[]{"64", "Phase4-Node-927"};
         commandCloserThat = "CLOSER THAN " + commandCloserThatArg[0] + " " + commandCloserThatArg[1];
 
-        commandShortestPathArg = new String[]{"Phase3-Node-823",  "Phase3-Node-558"};
+        commandShortestPathArg = new String[]{"Phase3-Node-823", "Phase3-Node-558"};
         commandShortestPath = "SHORTEST PATH " + commandShortestPathArg[0] + " " + commandShortestPathArg[1];
     }
 
@@ -164,7 +164,6 @@ public class CommandParserServiceImplTest {
         assertEquals(GraphClientCommand.SHORTEST_PATH, result.getCommand());
         assertArrayEquals(commandShortestPathArg, result.getArguments());
     }
-
 
 
 }

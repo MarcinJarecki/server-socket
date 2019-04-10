@@ -58,12 +58,11 @@ public class SessionServiceImplTest {
         sessionSecond.setUuid(uuidSecond);
         sessionSecond.setSessionStartTime(0);
         sessionSecond.setClientName("client name 2");
-        boolean resultSecond = sessionService.setSession(uuidSecond, session);
+        boolean resultSecond = sessionService.setSession(uuidSecond, sessionSecond);
 
         assertTrue(result);
         assertTrue(resultSecond);
     }
-
 
 
     @Test
